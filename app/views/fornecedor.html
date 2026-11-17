@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block titulo %}{{ f.nome }}{% endblock %}
+{% block conteudo %}
+<p><a href="{{ url_for('contratos.lista') }}">Voltar para contratos</a></p>
+<h1>{{ f.nome }}</h1>
+
+<dl class="dados">
+  <div><dt>{{ 'CPF' if f.tipo == 'PF' else 'CNPJ' }}</dt><dd>{{ f.documento | cnpj }}</dd></div>
+  {% if f.tipo == 'PJ' %}
+  <div><dt>Abertura</dt><dd>{{ f.data_abertura | data_br }}</dd></div>
+  <div><dt>Capital social</dt><dd>{{ f.capital_social | moeda }}</dd></div>
+  <div><dt>Atividade principal (CNAE)</dt><dd>{{ f.cnae_descricao or '—' }}</dd></div>
+  <div><dt>Situação na Receita</dt><dd>{{ f.situacao or '—' }}</dd></div>
+  {% endif %}
+</dl>
+
+<h2>Sanções (CEIS/CNEP)</h2>
+{% if sancoes %}
+<div class="tabela-wrap">
+  <table class="lista">
+    <thead><tr><th>Cadastro</th><th>Início</th><th>Fim</th><th>Órgão sancionador</th><th>Tipo</th></tr></thead>
+    <tbody>{% for s in sancoes %}
+      <tr><td>{{ s.cadastro }}</td><td>{{ s.data_inicio | data_br }}</td><td>{{ s.data_fim | data_br }}</td>
+          <td>{{ s.orgao_sancionador or '—' }}</td><td>{{ s.descricao or '—' }}</td></tr>
+    {% endfor %}</tbody>
+  </table>
+</div>
+{% else %}
+<p class="text-secondary">Nenhuma sanção encontrada no CEIS ou no CNEP.</p>
+{% endif %}
+
+<h2>Participação nos contratos do órgão</h2>
+{% if concentracao %}
+<div class="tabela-wrap">
+  <table class="lista">
+    <thead><tr><th>Órgão</th><th>Ano</th><th class="valor">Valor do fornecedor</th><th class="valor">Total do órgão</th><th class="valor">Participação</th></tr></thead>
+    <tbody>{% for x in concentracao %}
+      <tr><td>{{ x.orgao }}</td><td>{{ x.ano }}</td><td class="valor">{{ x.valor | moeda }}</td>
+          <td class="valor">{{ x.total | moeda }}</td><td class="valor">{{ x.percentual }}%</td></tr>
+    {% endfor %}</tbody>
+  </table>
+</div>
+{% else %}
+<p class="text-secondary">Sem contratos com data e valor para calcular a participação.</p>
+{% endif %}
+
+<h2>Contratos</h2>
+<div class="tabela-wrap">
+  <table class="lista">
+    <thead><tr><th>Score</th><th>Objeto</th><th class="valor">Valor</th><th>Assinatura</th></tr></thead>
+    <tbody>{% for c in contratos %}
+      <tr>
+        <td><span class="selo nivel-{{ c.nivel }}{{ ' zero' if c.score == 0 }}">{{ c.score }}</span></td>
+        <td class="objeto"><a href="{{ url_for('contratos.detalhe', id=c.id) }}">{{ c.objeto|truncate(140) }}</a></td>
+        <td class="valor">{{ c.valor_global | moeda }}</td>
+        <td>{{ c.data_assinatura | data_br }}</td>
+      </tr>
+    {% endfor %}</tbody>
+  </table>
+</div>
+{% endblock %}

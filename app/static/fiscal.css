@@ -129,3 +129,8 @@ table.lista td.valor, table.lista th.valor { text-align: right; white-space: now
 table.lista a { text-decoration: none; }
 table.lista a:hover { text-decoration: underline; }
 .selo.zero { color: #9AA5B8; border-style: dashed; }
+.cabecalho-detalhe { flex-wrap: nowrap; align-items: flex-start; }
+.cabecalho-detalhe > div { flex: 1; min-width: 0; }
+.cabecalho-detalhe .selo.grande { flex: none; }
+.cabecalho-detalhe h1 { font-size: clamp(1.3rem, 2.2vw, 1.75rem); }
+@media (max-width: 640px) { .cabecalho-detalhe { flex-wrap: wrap; } }

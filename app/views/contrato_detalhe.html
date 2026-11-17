@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block titulo %}Contrato {{ c.numero_controle_pncp }}{% endblock %}
+{% block conteudo %}
+<p><a href="{{ url_for('contratos.lista') }}">Voltar para contratos</a></p>
+<div class="cabecalho-detalhe">
+  <span class="selo grande nivel-{{ c.nivel }}{{ ' zero' if c.score == 0 }}" aria-label="Score {{ c.score }} de 100">{{ c.score }}</span>
+  <div>
+    <h1 class="mb-1">{{ c.objeto|truncate(160) }}</h1>
+    {% if c.nivel %}<span class="etiqueta nivel-{{ c.nivel }}">Risco {{ c.nivel|lower }}</span>{% endif %}
+  </div>
+</div>
+
+<dl class="dados">
+  <div><dt>Fornecedor</dt><dd><a href="{{ url_for('fornecedores.detalhe', documento=c.fornecedor.documento) }}">{{ c.fornecedor.nome }}</a><br>{{ c.fornecedor.documento | cnpj }}</dd></div>
+  <div><dt>Órgão contratante</dt><dd>{{ c.orgao.razao_social }}</dd></div>
+  <div><dt>Valor global</dt><dd>{{ c.valor_global | moeda }}</dd></div>
+  <div><dt>Valor inicial</dt><dd>{{ c.valor_inicial | moeda }}</dd></div>
+  <div><dt>Modalidade</dt><dd>{{ c.modalidade_id | modalidade }}</dd></div>
+  <div><dt>Assinatura</dt><dd>{{ c.data_assinatura | data_br }}</dd></div>
+  <div><dt>Número no PNCP</dt><dd>{{ c.numero_controle_pncp }}</dd></div>
+  <div><dt>Fontes</dt><dd>
+    {% if c.link_pncp %}<a href="{{ c.link_pncp }}" target="_blank" rel="noopener">Ver contrato no PNCP</a>{% endif %}
+    {% for p in pdfs %}<br><a href="{{ p.url_pdf }}" target="_blank" rel="noopener">Diário Oficial de {{ p.data_edicao | data_br }}</a>{% endfor %}
+  </dd></div>
+</dl>
+
+<h2>Explicação</h2>
+{% if c.explicacao %}
+  <div class="explicacao"><p class="mb-1">{{ c.explicacao }}</p><small class="text-secondary">Texto gerado por modelo de linguagem a partir dos indícios abaixo.</small></div>
+{% elif alertas %}
+  <p class="text-secondary">Explicação indisponível. Ela é gerada pelo comando <code>flask explicar</code> com o Ollama em execução.</p>
+{% else %}
+  <p class="text-secondary">Explicação indisponível: nenhuma verificação encontrou indícios neste contrato.</p>
+{% endif %}
+
+<h2>Indícios encontrados</h2>
+{% for a in alertas %}
+  {% set regra = regras.get(a.regra_codigo) %}
+  <section class="alerta">
+    <span class="pontos">+{{ a.pontos }}</span>
+    <h3>{{ regra.nome if regra else a.regra_codigo }}</h3>
+    {% if regra %}<div class="text-secondary small">{{ regra.base_legal }}</div>{% endif %}
+    <dl>
+      {% for k, v in a.evidencia.items() if k not in ('link', 'link_contratacao') %}
+        <dt>{{ ROTULOS_EVIDENCIA.get(k, k) }}</dt><dd>{{ evidencia_valor(k, v) }}</dd>
+      {% endfor %}
+      {% if a.evidencia.link_contratacao %}<dt>Fonte</dt><dd><a href="{{ a.evidencia.link_contratacao }}" target="_blank" rel="noopener">Ver licitação no PNCP</a></dd>{% endif %}
+    </dl>
+  </section>
+{% else %}
+  <p>Nenhuma das nove verificações encontrou indícios neste contrato.</p>
+{% endfor %}
+{% endblock %}

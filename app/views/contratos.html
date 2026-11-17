@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block titulo %}Contratos{% endblock %}
+{% block conteudo %}
+<h1>Contratos</h1>
+<p class="lead">Todos os contratos coletados, do maior para o menor score. Use os filtros para encontrar um órgão, um fornecedor ou um período.</p>
+
+<form class="filtros" method="get" action="{{ url_for('contratos.lista') }}">
+  <div>
+    <label for="f-fornecedor">Fornecedor (nome ou CNPJ)</label>
+    <input id="f-fornecedor" class="form-control" name="fornecedor" value="{{ filtros.fornecedor }}">
+  </div>
+  <div>
+    <label for="f-nivel">Risco</label>
+    <select id="f-nivel" class="form-select" name="nivel">
+      <option value="">Todos</option>
+      {% for n in niveis %}<option value="{{ n }}" {{ 'selected' if filtros.nivel == n }}>{{ n }}</option>{% endfor %}
+    </select>
+  </div>
+  <div>
+    <label for="f-modalidade">Modalidade</label>
+    <select id="f-modalidade" class="form-select" name="modalidade">
+      <option value="">Todas</option>
+      {% for id, nome in modalidades.items() %}<option value="{{ id }}" {{ 'selected' if filtros.modalidade == id }}>{{ nome }}</option>{% endfor %}
+    </select>
+  </div>
+  {% if orgaos|length > 1 %}
+  <div>
+    <label for="f-orgao">Órgão</label>
+    <select id="f-orgao" class="form-select" name="orgao">
+      <option value="">Todos</option>
+      {% for o in orgaos %}<option value="{{ o.id }}" {{ 'selected' if filtros.orgao == o.id }}>{{ o.razao_social }}</option>{% endfor %}
+    </select>
+  </div>
+  {% endif %}
+  <div>
+    <label for="f-de">Assinado de</label>
+    <input id="f-de" type="date" class="form-control" name="de" value="{{ filtros.de or '' }}">
+  </div>
+  <div>
+    <label for="f-ate">até</label>
+    <input id="f-ate" type="date" class="form-control" name="ate" value="{{ filtros.ate or '' }}">
+  </div>
+  <div>
+    <label for="f-ordem">Ordenar por</label>
+    <select id="f-ordem" class="form-select" name="ordem">
+      {% for k, nome in [('score', 'Score'), ('valor', 'Valor'), ('data', 'Data')] %}
+      <option value="{{ k }}" {{ 'selected' if filtros.ordem == k }}>{{ nome }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div><button class="btn btn-azulejo" type="submit">Filtrar</button></div>
+</form>
+
+<p class="text-secondary">{{ paginacao.total }} contrato{{ 's' if paginacao.total != 1 }} encontrado{{ 's' if paginacao.total != 1 }}.</p>
+
+{% if paginacao.items %}
+<div class="tabela-wrap">
+  <table class="lista">
+    <thead><tr><th>Score</th><th>Objeto</th><th>Fornecedor</th><th>Modalidade</th><th class="valor">Valor</th><th>Assinatura</th></tr></thead>
+    <tbody>
+    {% for c in paginacao.items %}
+      <tr>
+        <td><span class="selo nivel-{{ c.nivel }}{{ ' zero' if c.score == 0 }}" title="Risco {{ (c.nivel or 'não analisado')|lower }}">{{ c.score }}</span></td>
+        <td class="objeto"><a href="{{ url_for('contratos.detalhe', id=c.id) }}">{{ c.objeto|truncate(140) }}</a></td>
+        <td><a href="{{ url_for('fornecedores.detalhe', documento=c.fornecedor.documento) }}">{{ c.fornecedor.nome }}</a></td>
+        <td>{{ c.modalidade_id | modalidade }}</td>
+        <td class="valor">{{ c.valor_global | moeda }}</td>
+        <td>{{ c.data_assinatura | data_br }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% if paginacao.pages > 1 %}
+<nav class="d-flex gap-3 align-items-center mt-3" aria-label="Paginação">
+  {% set args = request.args.to_dict() %}
+  {% if paginacao.has_prev %}{% set _ = args.update(pagina=paginacao.prev_num) %}<a href="{{ url_for('contratos.lista', **args) }}">Página anterior</a>{% endif %}
+  <span>Página {{ paginacao.page }} de {{ paginacao.pages }}</span>
+  {% if paginacao.has_next %}{% set _ = args.update(pagina=paginacao.next_num) %}<a href="{{ url_for('contratos.lista', **args) }}">Próxima página</a>{% endif %}
+</nav>
+{% endif %}
+{% else %}
+<div class="vazio">Nenhum contrato corresponde a esses filtros. Remova algum filtro para ampliar a busca.</div>
+{% endif %}
+{% endblock %}
