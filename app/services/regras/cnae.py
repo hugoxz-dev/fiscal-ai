@@ -33,18 +33,18 @@ class CnaeIncompativel(Regra):
         cnae = atividades(f)
         j = JulgamentoCnae.query.filter_by(contrato_id=contrato.id).first() if contrato.id else None
         valido = j is not None and j.cnae_descricao == cnae and j.objeto == contrato.objeto
-        if ctx.llm is not None:
-            modelo = getattr(ctx.llm, "model", None)
-            if not valido or j.modelo != modelo:
-                resposta = ctx.llm.cnae_compativel(contrato.objeto, cnae)
-                if resposta is None:
-                    return None  # LLM falhou: não guarda, tenta de novo na próxima análise
+        modelo = getattr(ctx.llm, "model", None)
+        if ctx.llm is not None and (not valido or j.modelo != modelo):
+            resposta = ctx.llm.cnae_compativel(contrato.objeto, cnae)
+            if resposta is not None:
                 j = j or JulgamentoCnae(contrato_id=contrato.id)
-                j.cnae_descricao, j.objeto, j.modelo, (j.compativel, j.justificativa) = (
-                    cnae, contrato.objeto, modelo, resposta)
+                j.cnae_descricao, j.objeto, j.modelo = cnae, contrato.objeto, modelo
+                j.compativel, j.justificativa = resposta
                 db.session.add(j)
-        elif not valido:
-            return None  # sem Ollama e sem julgamento guardado para estes dados
+                valido = True
+            # LLM falhou: nada é guardado; vale o julgamento anterior, se ainda for para estes dados
+        if not valido:
+            return None  # sem julgamento para o CNAE e o objeto atuais
         if j.compativel:
             return None
         return self.resultado(contrato, {"objeto": contrato.objeto, "cnae": f.cnae_descricao,

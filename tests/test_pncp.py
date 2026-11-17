@@ -161,3 +161,23 @@ def test_falha_de_rede_em_uma_consulta_nao_derruba_a_coleta(app):
 
 def test_parse_contratacao_guarda_amparo_legal(fixture_contratacoes):
     assert parse_contratacao(fixture_contratacoes[0])["amparo_legal"] == "Lei 14.133/2021, Art. 28, I"
+
+
+def test_compra_ja_salva_sem_amparo_legal_e_buscada_de_novo(app):
+    from app.services.coletores.pncp import _garantir_contratacao
+
+    item = carregar("pncp_compra.json")
+    d = parse_contratacao(item)
+    d["amparo_legal"] = None  # salva antes da coluna existir
+    upsert_contratacao(d)
+    db.session.commit()
+    chamadas = []
+
+    def get(url, params=None):
+        chamadas.append(url)
+        return item
+
+    _garantir_contratacao(get, item["numeroControlePNCP"], "2111300")
+    _garantir_contratacao(get, item["numeroControlePNCP"], "2111300")
+    assert len(chamadas) == 1
+    assert Contratacao.query.one().amparo_legal == item["amparoLegal"]["nome"]

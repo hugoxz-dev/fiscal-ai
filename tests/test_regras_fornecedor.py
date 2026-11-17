@@ -178,3 +178,12 @@ def test_cnae_nao_julga_associacao_nem_cooperativa(fazer_contrato):
         c = fazer_contrato(fornecedor=f, objeto="Gêneros alimentícios da agricultura familiar (PNAE)")
         assert CnaeIncompativel(PESOS).avaliar(c, Contexto([], {}, llm)) is None
     assert llm.chamadas == 0
+
+
+def test_cnae_modelo_novo_falhando_mantem_julgamento_guardado(fazer_contrato):
+    c = fazer_contrato(fornecedor=_pj(), objeto="Pavimentação asfáltica")
+    CnaeIncompativel(PESOS).avaliar(c, Contexto([], {}, LLMFalso((False, "papelaria não faz asfalto"))))
+    novo = LLMFalso(None)
+    novo.model = "outro:7b"
+    r = CnaeIncompativel(PESOS).avaliar(c, Contexto([], {}, novo))
+    assert r is not None and r.evidencia["modelo"] == "qwen2.5:7b"

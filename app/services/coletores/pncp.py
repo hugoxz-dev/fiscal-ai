@@ -202,7 +202,8 @@ def _numero_compra_para_partes(numero: str) -> tuple[str, int, int]:
 
 
 def _garantir_contratacao(get: GetFn, numero: str, ibge: str) -> None:
-    if Contratacao.query.filter_by(numero_controle_pncp=numero).first():
+    existente = Contratacao.query.filter_by(numero_controle_pncp=numero).first()
+    if existente and existente.amparo_legal:  # sem amparo: salva antes da coluna existir, busca de novo
         return
     cnpj, ano, seq = _numero_compra_para_partes(numero)
     item = get(f"{CONSULTA}/orgaos/{cnpj}/compras/{ano}/{seq}")

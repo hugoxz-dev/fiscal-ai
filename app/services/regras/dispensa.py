@@ -17,7 +17,8 @@ def limite_dispensa(contrato: Contrato) -> tuple[Decimal, str]:
     return tabela[categoria], categoria
 
 
-_INCISO = re.compile(r"art\.?\s*75\s*,?\s*(?:inciso\s*)?([IVXL]+)\b", re.IGNORECASE)
+# Dispensas por valor: art. 75, I e II (Lei 14.133) ou art. 24, I e II (Lei 8.666, contratos antigos).
+_INCISO = re.compile(r"art\.?\s*(75|24)\s*,?\s*(?:inciso\s*)?([IVXL]+)\b", re.IGNORECASE)
 
 
 def amparo_legal(contrato: Contrato) -> str | None:
@@ -25,14 +26,15 @@ def amparo_legal(contrato: Contrato) -> str | None:
 
 
 def dispensa_por_valor(contrato: Contrato) -> bool:
-    """Dispensa do art. 75, I ou II (as únicas com teto de valor). Amparo desconhecido conta como sim."""
+    """Dispensa por valor (as únicas com teto). Sem amparo informado, conta como sim; amparo informado
+    que não seja art. 75/24, I ou II (emergência, § 7º etc.), conta como não."""
     if contrato.modalidade_id != MODALIDADE_DISPENSA:
         return False
     amparo = amparo_legal(contrato)
     if not amparo:
         return True
     m = _INCISO.search(amparo)
-    return m is None or m.group(1).upper() in ("I", "II")
+    return m is not None and m.group(2).upper() in ("I", "II")
 
 
 class DispensaLimite(Regra):

@@ -97,3 +97,26 @@ def test_fracionamento_ignora_dispensa_sem_limite_de_valor(fazer_contrato):
         _com_amparo(fazer_contrato, "Lei 14.133/2021, Art. 75, VIII", modalidade_id=8, valor_global=Decimal("30000"))
     ctx = _ctx()
     assert all(Fracionamento(PESOS).avaliar(c, ctx) is None for c in ctx.contratos)
+
+
+def test_dispensa_por_valor_reconhece_amparos():
+    from types import SimpleNamespace as NS
+
+    from app.services.regras.dispensa import dispensa_por_valor
+
+    def c(amparo):
+        return NS(modalidade_id=8, contratacao=NS(amparo_legal=amparo) if amparo is not None else None)
+
+    assert dispensa_por_valor(c(None)) is True  # desconhecido: verifica
+    assert dispensa_por_valor(c("Lei 14.133/2021, Art. 75, II")) is True
+    assert dispensa_por_valor(c("Lei 14.133/2021, Art. 75, I")) is True
+    assert dispensa_por_valor(c("Lei 8.666/1993, Art. 24, II")) is True
+    for outro in ("Lei 14.133/2021, Art. 75, III", "Lei 14.133/2021, Art. 75, VIII", "Lei 14.133/2021, Art. 75, IV, a",
+                  "Lei 8.666/1993, Art. 24, IV", "Lei 14.133/2021, Art. 75, § 7º"):
+        assert dispensa_por_valor(c(outro)) is False, outro
+
+
+def test_dispensa_2024_usa_limite_de_2024(fazer_contrato, ctx_vazio):
+    c = fazer_contrato(modalidade_id=8, valor_global=Decimal("61000"), data_assinatura=date(2024, 6, 1))
+    r = DispensaLimite(PESOS).avaliar(c, ctx_vazio)
+    assert r is not None and r.evidencia["limite"] == "59906.02"

@@ -38,6 +38,7 @@ copy .env.example .env            # e preencha TRANSPARENCIA_API_KEY
    CREATE DATABASE fiscal_ai CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
    ```
 3. Crie as tabelas: `flask init-db` (também grava o DDL em `sql/schema.sql`).
+   Banco criado antes de 17/11/2026? Rode `sql/migracao_2026-11-17.sql` no Workbench e depois recolete `cnpj` e `pncp`.
 4. Ollama: instale em <https://ollama.com>, depois `ollama pull qwen2.5:7b`. O modelo cabe numa GPU de 6 GB.
 5. Chave do Portal da Transparência: cadastre-se em <https://portaldatransparencia.gov.br/api-de-dados/cadastrar-email> e coloque a chave em `TRANSPARENCIA_API_KEY` no `.env`.
 
