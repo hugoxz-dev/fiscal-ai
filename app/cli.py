@@ -26,9 +26,16 @@ def _coletar_pncp(de: date, ate: date, cfg) -> int:
     return coletar_pncp(de, ate, cfg["IBGE_MUNICIPIO"])
 
 
+def _coletar_cnpj(de: date, ate: date, cfg) -> int:
+    from .services.coletores.brasilapi import enriquecer_fornecedores
+
+    return enriquecer_fornecedores()
+
+
 # Ordem importa em "todas": contratos antes de enriquecer CNPJ e sanções.
 FONTES = {
     "pncp": _coletar_pncp,
+    "cnpj": _coletar_cnpj,
 }
 
 
