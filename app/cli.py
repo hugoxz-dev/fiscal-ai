@@ -90,3 +90,28 @@ def registrar_comandos(app: Flask) -> None:
             click.echo(f"Coletando {nome} de {d_ini:%d/%m/%Y} a {d_fim:%d/%m/%Y}...")
             n = FONTES[nome](d_ini, d_fim, cfg)
             click.echo(f"{nome}: {n} registros")
+
+    @app.cli.command("analisar")
+    def analisar():
+        """Aplica as regras de risco a todos os contratos e calcula o score."""
+        from .services import analisador
+
+        llm = analisador.get_llm()
+        if not llm.disponivel():
+            click.echo("Ollama indisponível — regra de CNAE ignorada.")
+            llm = None
+        r = analisador.analisar_todos(llm)
+        click.echo(f"Contratos: {r['contratos']} | Alertas: {r['alertas']} | "
+                   f"Alto: {r['alto']} | Médio: {r['medio']} | Baixo: {r['baixo']}")
+
+    @app.cli.command("explicar")
+    @click.option("--limite", default=50, show_default=True, help="Máximo de contratos a explicar")
+    def explicar(limite):
+        """Gera com o LLM a explicação em português dos contratos com alertas."""
+        from .services import analisador
+
+        llm = analisador.get_llm()
+        if not llm.disponivel():
+            click.echo("Ollama indisponível — nada a fazer. Inicie o Ollama e rode de novo.")
+            return
+        click.echo(f"Explicações geradas: {analisador.explicar_pendentes(llm, limite)}")
