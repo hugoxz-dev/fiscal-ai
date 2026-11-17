@@ -31,7 +31,8 @@ class FornecedorNovo(Regra):
                 criterios.append("empresa_recente")
                 evidencia.update({"data_abertura": f.data_abertura.isoformat(),
                                   "meses_entre_abertura_e_contrato": meses})
-        if f.capital_social is not None and contrato.valor_global:
+        # Capital 0 = não informado (associações e cooperativas não têm capital social).
+        if f.capital_social and contrato.valor_global:
             minimo = contrato.valor_global * Decimal(str(PARAMS["capital_min_pct"]))
             if f.capital_social < minimo:
                 criterios.append("capital_baixo")

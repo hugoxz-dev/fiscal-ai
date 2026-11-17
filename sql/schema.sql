@@ -148,3 +148,15 @@ CREATE TABLE extrato_diario (
 	FOREIGN KEY(publicacao_id) REFERENCES publicacao_diario (id), 
 	FOREIGN KEY(contrato_id) REFERENCES contrato (id)
 );
+
+CREATE TABLE julgamento_cnae (
+	id INTEGER NOT NULL AUTO_INCREMENT, 
+	contrato_id INTEGER NOT NULL, 
+	cnae_descricao VARCHAR(255) NOT NULL, 
+	modelo VARCHAR(60), 
+	compativel BOOL NOT NULL, 
+	justificativa TEXT, 
+	PRIMARY KEY (id), 
+	UNIQUE (contrato_id), 
+	FOREIGN KEY(contrato_id) REFERENCES contrato (id)
+);

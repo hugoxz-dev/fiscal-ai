@@ -131,3 +131,9 @@ def test_cnae_resposta_none_nao_e_guardada(fazer_contrato):
     CnaeIncompativel(PESOS).avaliar(c, Contexto([], {}, llm))
     CnaeIncompativel(PESOS).avaliar(c, Contexto([], {}, llm))
     assert llm.chamadas == 2
+
+
+def test_capital_zero_e_tratado_como_nao_informado(fazer_contrato, ctx_vazio):
+    # Associações e cooperativas não têm capital social: a Receita devolve 0.
+    c = fazer_contrato(fornecedor=_pj(capital_social=Decimal("0.00")), valor_global=Decimal("100000"))
+    assert FornecedorNovo(PESOS).avaliar(c, ctx_vazio) is None

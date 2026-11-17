@@ -118,4 +118,5 @@ pytest
 - O PNCP publica só o vencedor de cada item, não o número de participantes. A regra de competição usa uma aproximação (licitações com vários itens vencidas por um único fornecedor).
 - No PNCP, todas as secretarias aparecem sob o CNPJ do Município, por isso a comparação é por órgão contratante.
 - Extratos do Diário Oficial nem sempre trazem o CNPJ. A ligação com o contrato usa o nome do fornecedor e o valor (±1%).
+- Capital social 0 (associações e cooperativas, comuns na merenda escolar) é tratado como não informado.
 - A compatibilidade entre CNAE e objeto é um julgamento do modelo de linguagem e pode errar.
