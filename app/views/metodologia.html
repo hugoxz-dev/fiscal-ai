@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block titulo %}Metodologia{% endblock %}
+{% block conteudo %}
+<h1>Como o score de risco é calculado</h1>
+<p class="lead">O Fiscal AI não decide sozinho se houve irregularidade. Ele aplica regras objetivas, com base legal, a dados públicos. Cada regra que se confirma soma os pontos indicados ao score do contrato, até o máximo de 100.</p>
+
+<h2>As nove verificações</h2>
+<div>
+  {% for r in regras %}
+  <div class="regra">
+    <div class="peso" title="Pontos somados ao score">+{{ r.peso }}</div>
+    <div>
+      <h3>{{ r.nome }}</h3>
+      <div class="lei">{{ r.base_legal }}</div>
+      <p class="mb-0">{{ r.descricao }}</p>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<h2>Níveis de risco</h2>
+<p>
+  {% for minimo, nome in niveis %}
+    <span class="etiqueta nivel-{{ nome }}">{{ nome }}</span> score a partir de {{ minimo }}{{ "; " if not loop.last else "." }}
+  {% endfor %}
+</p>
+
+<h2>Limites de dispensa usados</h2>
+<p>
+  {% for ano, t in limites.items() %}
+    {{ ano }}: obras e serviços de engenharia até {{ t.obras | moeda }}; demais compras e serviços até {{ t.geral | moeda }}.
+  {% endfor %}
+  Anos sem tabela própria usam a mais recente.
+</p>
+
+<h2>Papel da inteligência artificial</h2>
+<p class="lead">Um modelo de linguagem local (Qwen 2.5, via Ollama) faz três coisas: lê os extratos do Diário Oficial e organiza os dados, avalia se a atividade da empresa combina com o objeto do contrato, e escreve em português a explicação dos indícios. A decisão de marcar um contrato é sempre das regras acima.</p>
+
+<h2>Fontes</h2>
+<ul>
+  <li>PNCP — Portal Nacional de Contratações Públicas: licitações, contratos e aditivos.</li>
+  <li>Diário Oficial do Município de São Luís: extratos de contratos, dispensas e aditivos.</li>
+  <li>Portal da Transparência (CGU): cadastros de empresas sancionadas (CEIS e CNEP) e convênios federais.</li>
+  <li>BrasilAPI (dados públicos da Receita Federal): data de abertura, capital social e CNAE das empresas.</li>
+</ul>
+
+<h2>Limitações conhecidas</h2>
+<ul>
+  <li>O PNCP publica apenas o vencedor de cada item, não o número de participantes. A verificação de baixa competição usa uma aproximação: licitações com vários itens vencidas por um único fornecedor.</li>
+  <li>A compatibilidade entre CNAE e objeto é um julgamento do modelo de linguagem e pode errar; por isso tem peso menor.</li>
+  <li>Extratos do Diário Oficial nem sempre trazem o CNPJ; a ligação com o contrato usa o nome do fornecedor e o valor, e pode deixar extratos sem vínculo.</li>
+  <li>Os contratos da Prefeitura aparecem no PNCP sob o CNPJ do Município; por isso a comparação é feita por órgão contratante e não por secretaria.</li>
+</ul>
+{% endblock %}

@@ -1,0 +1,131 @@
+/* Fiscal AI — tokens visuais
+   Azul-azulejo de São Luís + tinta azul-noite; cores de risco reservadas aos níveis. */
+:root {
+  --fundo: #F5F7FA;
+  --papel: #FFFFFF;
+  --tinta: #14213D;
+  --tinta-suave: #4A5872;
+  --azulejo: #1F4E9C;
+  --azulejo-claro: #DCE6F5;
+  --linha: #D9E0EA;
+  --alto: #B42318;
+  --alto-fundo: #FDECEA;
+  --medio: #A15C07;
+  --medio-fundo: #FEF3E2;
+  --baixo: #2E7D4F;
+  --baixo-fundo: #E8F4EC;
+  --fonte-titulo: "Archivo", "Arial Narrow", Arial, sans-serif;
+  --fonte-texto: "Public Sans", "Segoe UI", Arial, sans-serif;
+}
+
+body {
+  background: var(--fundo);
+  color: var(--tinta);
+  font-family: var(--fonte-texto);
+  font-size: 1rem;
+  line-height: 1.55;
+  font-variant-numeric: tabular-nums;
+}
+
+h1, h2, h3, .titulo {
+  font-family: var(--fonte-titulo);
+  font-stretch: 87.5%;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--tinta);
+}
+h1 { font-size: clamp(1.75rem, 3vw, 2.4rem); line-height: 1.15; }
+h2 { font-size: 1.35rem; margin-top: 2.25rem; }
+
+a { color: var(--azulejo); }
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible {
+  outline: 3px solid var(--azulejo);
+  outline-offset: 2px;
+}
+
+/* Faixa de azulejos: o único ornamento do site */
+.azulejos {
+  height: 14px;
+  background-color: var(--azulejo);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='14' viewBox='0 0 28 14'%3E%3Cg fill='none' stroke='%23DCE6F5' stroke-width='1.2'%3E%3Cpath d='M7 1 L13 7 L7 13 L1 7 Z'/%3E%3Ccircle cx='21' cy='7' r='3.2'/%3E%3Cpath d='M14 0 V14'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.topo { background: var(--papel); border-bottom: 1px solid var(--linha); }
+.topo .marca { font-family: var(--fonte-titulo); font-weight: 800; font-size: 1.35rem; color: var(--tinta); text-decoration: none; }
+.topo .marca small { font-family: var(--fonte-texto); font-weight: 400; font-size: .85rem; color: var(--tinta-suave); margin-left: .5rem; }
+.topo nav a { color: var(--tinta-suave); text-decoration: none; margin-left: 1.25rem; font-weight: 500; }
+.topo nav a.ativo, .topo nav a:hover { color: var(--azulejo); text-decoration: underline; text-underline-offset: 6px; }
+
+.conteudo { max-width: 1120px; margin: 0 auto; padding: 2rem 1rem 3rem; }
+.lead { color: var(--tinta-suave); max-width: 65ch; }
+
+/* Números-chave em linha, sem cartões */
+.numeros { display: flex; flex-wrap: wrap; gap: 2.5rem; margin: 1.75rem 0 .5rem; padding: 1.25rem 0; border-top: 2px solid var(--tinta); border-bottom: 1px solid var(--linha); }
+.numeros div { min-width: 9rem; }
+.numeros strong { display: block; font-family: var(--fonte-titulo); font-size: 1.9rem; font-weight: 700; line-height: 1.1; }
+.numeros span { color: var(--tinta-suave); font-size: .9rem; }
+.numeros .alto strong { color: var(--alto); }
+
+/* Selo do score */
+.selo { display: inline-flex; align-items: center; justify-content: center; width: 2.6rem; height: 2.6rem; border-radius: 50%;
+  font-family: var(--fonte-titulo); font-weight: 800; font-size: 1rem; border: 2px solid currentColor; background: var(--papel); }
+.selo.grande { width: 6.5rem; height: 6.5rem; font-size: 2.2rem; border-width: 4px; }
+.nivel-Alto { color: var(--alto); }
+.nivel-Médio { color: var(--medio); }
+.nivel-Baixo { color: var(--baixo); }
+.etiqueta { display: inline-block; padding: .1rem .55rem; border-radius: 3px; font-size: .82rem; font-weight: 600; }
+.etiqueta.nivel-Alto { background: var(--alto-fundo); }
+.etiqueta.nivel-Médio { background: var(--medio-fundo); }
+.etiqueta.nivel-Baixo { background: var(--baixo-fundo); }
+
+/* Tabelas */
+.tabela-wrap { overflow-x: auto; background: var(--papel); border: 1px solid var(--linha); border-radius: 4px; }
+table.lista { width: 100%; border-collapse: collapse; font-size: .95rem; }
+table.lista th { text-align: left; font-weight: 600; color: var(--tinta-suave); font-size: .85rem; padding: .7rem .8rem; border-bottom: 2px solid var(--linha); background: #FAFBFD; }
+table.lista td { padding: .7rem .8rem; border-bottom: 1px solid var(--linha); vertical-align: top; }
+table.lista tr:last-child td { border-bottom: 0; }
+table.lista td.valor, table.lista th.valor { text-align: right; white-space: nowrap; }
+.objeto { max-width: 46ch; }
+
+.grafico { background: var(--papel); border: 1px solid var(--linha); border-radius: 4px; padding: 1rem; height: 300px; }
+
+.vazio { background: var(--papel); border: 1px dashed var(--linha); padding: 2rem; border-radius: 4px; }
+
+/* Metodologia */
+.regra { padding: 1.1rem 0; border-bottom: 1px solid var(--linha); display: grid; grid-template-columns: 4rem 1fr; gap: 1rem; }
+.regra .peso { font-family: var(--fonte-titulo); font-size: 1.6rem; font-weight: 700; color: var(--azulejo); }
+.regra h3 { font-size: 1.1rem; margin: 0 0 .2rem; }
+.regra .lei { color: var(--tinta-suave); font-size: .88rem; margin-bottom: .35rem; }
+
+/* Detalhe */
+.cabecalho-detalhe { display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap; }
+.dados { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: .25rem 2rem; margin: 1.5rem 0; }
+.dados dt { color: var(--tinta-suave); font-weight: 400; font-size: .85rem; }
+.dados dd { margin: 0 0 .75rem; font-weight: 500; }
+.alerta { background: var(--papel); border: 1px solid var(--linha); border-left: 4px solid var(--alto); padding: 1rem 1.25rem; margin-bottom: 1rem; border-radius: 0 4px 4px 0; }
+.alerta h3 { font-size: 1.05rem; margin: 0; }
+.alerta .pontos { float: right; font-family: var(--fonte-titulo); font-weight: 700; color: var(--alto); }
+.alerta dl { display: grid; grid-template-columns: minmax(8rem, max-content) 1fr; gap: .2rem 1rem; margin: .75rem 0 0; font-size: .9rem; }
+.alerta dt { color: var(--tinta-suave); font-weight: 400; }
+.alerta dd { margin: 0; word-break: break-word; }
+.explicacao { background: var(--azulejo-claro); padding: 1rem 1.25rem; border-radius: 4px; max-width: 75ch; }
+
+.filtros { display: flex; flex-wrap: wrap; gap: .75rem; align-items: end; background: var(--papel); border: 1px solid var(--linha); padding: 1rem; border-radius: 4px; margin-bottom: 1rem; }
+.filtros label { display: block; font-size: .82rem; color: var(--tinta-suave); }
+.filtros .form-control, .filtros .form-select { min-width: 9rem; }
+.btn-azulejo { background: var(--azulejo); color: #fff; border: 0; }
+.btn-azulejo:hover { background: #173d7a; color: #fff; }
+
+.rodape { border-top: 1px solid var(--linha); background: var(--papel); }
+.rodape .aviso { max-width: 1120px; margin: 0 auto; padding: 1.25rem 1rem; color: var(--tinta-suave); font-size: .9rem; }
+
+@media (max-width: 640px) {
+  .topo nav a { margin-left: .9rem; }
+  .numeros { gap: 1.25rem; }
+  .regra { grid-template-columns: 3rem 1fr; }
+}
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+
+table.lista a { text-decoration: none; }
+table.lista a:hover { text-decoration: underline; }
+.selo.zero { color: #9AA5B8; border-style: dashed; }

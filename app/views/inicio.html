@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block titulo %}Início{% endblock %}
+{% block conteudo %}
+<h1>Onde estão os indícios de risco nos contratos da Prefeitura</h1>
+<p class="lead">Cada contrato publicado no PNCP passa por nove verificações baseadas na Lei 14.133/2021. Quanto maior o score, mais indícios foram encontrados — e mais vale a pena olhar de perto.</p>
+
+{% if kpis.contratos == 0 %}
+  <div class="vazio mt-4">
+    <h2 class="mt-0">Nenhum contrato analisado ainda</h2>
+    <p class="mb-0">Rode <code>flask coletar</code> e depois <code>flask analisar</code> para preencher o painel.</p>
+  </div>
+{% else %}
+  <div class="numeros">
+    <div><strong>{{ kpis.contratos }}</strong><span>contratos analisados</span></div>
+    <div><strong>{{ kpis.valor | moeda }}</strong><span>valor total contratado</span></div>
+    <div class="alto"><strong>{{ kpis.alto }}</strong><span>com risco alto</span></div>
+    <div><strong>{{ kpis.medio }}</strong><span>com risco médio</span></div>
+    <div><strong>{{ kpis.convenios | moeda if kpis.convenios else "—" }}</strong><span>em convênios federais</span></div>
+  </div>
+
+  <h2>Contratos com mais indícios</h2>
+  <div class="tabela-wrap">
+    <table class="lista">
+      <thead><tr><th>Score</th><th>Objeto</th><th>Fornecedor</th><th class="valor">Valor</th><th>Assinatura</th></tr></thead>
+      <tbody>
+      {% for c in top %}
+        <tr>
+          <td><span class="selo nivel-{{ c.nivel }}{{ " zero" if c.score == 0 }}" title="Risco {{ c.nivel|lower }}">{{ c.score }}</span></td>
+          <td class="objeto"><a href="/contratos/{{ c.id }}">{{ c.objeto|truncate(140) }}</a></td>
+          <td><a href="/fornecedores/{{ c.fornecedor.documento }}">{{ c.fornecedor.nome }}</a></td>
+          <td class="valor">{{ c.valor_global | moeda }}</td>
+          <td>{{ c.data_assinatura | data_br }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Valor contratado por modalidade</h2>
+  <div class="grafico"><canvas id="grafico-modalidade" aria-label="Valor contratado por modalidade" role="img"></canvas></div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{% if kpis.contratos %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+  const dados = {{ grafico | tojson }};
+  new Chart(document.getElementById("grafico-modalidade"), {
+    type: "bar",
+    data: { labels: dados.rotulos, datasets: [{ data: dados.valores, backgroundColor: "#1F4E9C", borderRadius: 2 }] },
+    options: {
+      indexAxis: "y", maintainAspectRatio: false, animation: false,
+      plugins: { legend: { display: false },
+        tooltip: { callbacks: { label: (c) => c.raw.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) } } },
+      scales: { x: { ticks: { callback: (v) => (v / 1e6).toLocaleString("pt-BR") + " mi" }, grid: { color: "#D9E0EA" } },
+                y: { grid: { display: false } } }
+    }
+  });
+</script>
+{% endif %}
+{% endblock %}
