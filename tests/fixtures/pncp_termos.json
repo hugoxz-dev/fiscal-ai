@@ -1,0 +1,56 @@
+[
+ {
+  "orgaoSubrogado": null,
+  "unidade": {
+   "codigoUnidade": "2124",
+   "nomeUnidade": "Secretaria Municipal de Informação e Tecnologia",
+   "municipioNome": "São Luís",
+   "codigoIbge": "2111300",
+   "ufSigla": "MA",
+   "ufNome": "Maranhão"
+  },
+  "fornecedor": {
+   "id": 116418,
+   "niFornecedor": "32441928000106",
+   "nomeRazaoSocial": "MARPEX COMERCIO E SERVICOS LIMITADA",
+   "tipoPessoaId": "PJ"
+  },
+  "niFornecedor": "32441928000106",
+  "fornecedorSubContratado": null,
+  "niFornecedorSubContratado": null,
+  "orgaoEntidade": {
+   "cnpj": "06307102000130",
+   "razaoSocial": "MUNICIPIO DE SAO LUIS",
+   "esferaId": "M",
+   "poderId": "N"
+  },
+  "dataAssinatura": "2024-11-08",
+  "dataVigenciaFim": "2024-12-31",
+  "dataVigenciaInicio": "2024-11-08",
+  "dataAtualizacao": "2024-11-13T11:20:45",
+  "tipoPessoa": "PJ",
+  "nomeRazaoSocialFornecedor": "MARPEX COMERCIO E SERVICOS LIMITADA",
+  "dataInclusao": "2024-11-13T11:20:45",
+  "dataPublicacaoPncp": "2024-11-13T11:20:45",
+  "informacaoComplementar": null,
+  "unidadeSubrogada": null,
+  "processo": "16156/2024",
+  "sequencialTermoContrato": 1,
+  "numeroTermoContrato": "13/2024",
+  "qualificacaoReajuste": false,
+  "prazoAditadoDias": 0,
+  "qualificacaoFornecedor": false,
+  "qualificacaoAcrescimoSupressao": true,
+  "qualificacaoVigencia": false,
+  "informativoObservacao": "A presente contratação se dá pela necessidade de suprir a SEMIT no fornecimento de Material de Consumo (Material de Expediente, Material de Limpeza e Gêneros Alimentícios), visando assegurar o pleno funcionamento das atividades administrativas e operacionais e otimizando os recursos disponíveis nesta Secretaria Municipal de Informação e Tecnologia – SEMIT",
+  "objetoTermoContrato": "A presente contratação se dá pela necessidade de suprir a SEMIT no fornecimento de Material de Consumo (Material de Expediente, Material de Limpeza e Gêneros Alimentícios), visando assegurar o pleno funcionamento das atividades administrativas e operacionais e otimizando os recursos disponíveis nesta Secretaria Municipal de Informação e Tecnologia – SEMIT",
+  "fundamentoLegal": "",
+  "valorAcrescido": 3596.84,
+  "tipoPessoaSubContratada": null,
+  "numeroParcelas": 1,
+  "nomeFornecedorSubContratado": null,
+  "valorParcela": 3596.84,
+  "valorGlobal": 3596.84,
+  "tipoTermoContratoNome": "Termo Aditivo"
+ }
+]
