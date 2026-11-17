@@ -6,8 +6,9 @@ from .contrato import Contrato
 from .convenio import Convenio
 from .diario import ExtratoDiario, PublicacaoDiario
 from .fornecedor import Fornecedor
+from .julgamento_cnae import JulgamentoCnae
 from .orgao import Orgao
 from .sancao import Sancao
 
 __all__ = ["Aditivo", "Alerta", "ColetaLog", "Contratacao", "Contrato", "Convenio",
-           "ExtratoDiario", "PublicacaoDiario", "Fornecedor", "Orgao", "Sancao"]
+           "ExtratoDiario", "PublicacaoDiario", "Fornecedor", "JulgamentoCnae", "Orgao", "Sancao"]

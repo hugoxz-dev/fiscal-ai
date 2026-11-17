@@ -95,3 +95,39 @@ def test_sancao_expirada_nao_dispara(fazer_contrato):
     c = fazer_contrato(fornecedor=_pj(), data_assinatura=date(2025, 5, 1))
     ctx = Contexto([], {"11222333000144": [_sancao(date(2022, 1, 1), date(2023, 1, 1))]}, None)
     assert Sancionado(PESOS).avaliar(c, ctx) is None
+
+
+class LLMContador(LLMFalso):
+    def __init__(self, resposta):
+        super().__init__(resposta)
+        self.chamadas = 0
+
+    def cnae_compativel(self, objeto, cnae):
+        self.chamadas += 1
+        return self.resposta
+
+
+def test_cnae_julgamento_fica_guardado_e_nao_repete(fazer_contrato):
+    c = fazer_contrato(fornecedor=_pj(), objeto="Pavimentação asfáltica")
+    llm = LLMContador((False, "papelaria não faz asfalto"))
+    r1 = CnaeIncompativel(PESOS).avaliar(c, Contexto([], {}, llm))
+    r2 = CnaeIncompativel(PESOS).avaliar(c, Contexto([], {}, llm))
+    assert llm.chamadas == 1
+    assert r1.evidencia == r2.evidencia
+
+
+def test_cnae_julgamento_refeito_se_cnae_mudar(fazer_contrato):
+    c = fazer_contrato(fornecedor=_pj(), objeto="Pavimentação asfáltica")
+    llm = LLMContador((True, "ok"))
+    CnaeIncompativel(PESOS).avaliar(c, Contexto([], {}, llm))
+    c.fornecedor.cnae_descricao = "Construção de rodovias"
+    CnaeIncompativel(PESOS).avaliar(c, Contexto([], {}, llm))
+    assert llm.chamadas == 2
+
+
+def test_cnae_resposta_none_nao_e_guardada(fazer_contrato):
+    c = fazer_contrato(fornecedor=_pj())
+    llm = LLMContador(None)
+    CnaeIncompativel(PESOS).avaliar(c, Contexto([], {}, llm))
+    CnaeIncompativel(PESOS).avaliar(c, Contexto([], {}, llm))
+    assert llm.chamadas == 2
