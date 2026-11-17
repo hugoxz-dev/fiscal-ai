@@ -7,6 +7,7 @@ from functools import partial
 from typing import Callable
 
 import click
+import requests
 
 from ...extensions import db
 from ...models import Aditivo, ColetaLog, Contratacao, Contrato, Fornecedor, Orgao
@@ -222,13 +223,24 @@ def _atualizar_competicao(get: GetFn, compra: Contratacao) -> None:
 
 def coletar_pncp(de: date, ate: date, ibge: str, get: GetFn | None = None) -> int:
     """Coleta contratações, contratos, aditivos e resultados do município. Retorna nº de registros."""
-    if get is None:
-        get = partial(get_json, criar_sessao())
+    get_api = get or partial(get_json, criar_sessao())
+    falhas: list[str] = []
+
+    def get(url, params=None):
+        """Uma consulta que falha (timeout, queda da API) é registrada e pulada, sem perder o resto."""
+        try:
+            return get_api(url, params=params)
+        except requests.RequestException as exc:
+            falhas.append(f"{url} {params or ''}: {exc}")
+            click.echo(f"  falha ao consultar {url} ({exc.__class__.__name__}); seguindo")
+            return None
+
     log = ColetaLog(fonte="pncp", inicio=datetime.now())
     db.session.add(log)
     total = 0
     try:
-        cnpjs: set[str] = set()
+        # órgãos municipais já conhecidos também têm seus contratos consultados
+        cnpjs: set[str] = {o.cnpj for o in Orgao.query.filter_by(esfera="M")}
         for ini, fim in _janelas(de, ate, JANELA_CONTRATACOES):
             for modalidade in MODALIDADES:
                 params = {"dataInicial": ini.strftime("%Y%m%d"), "dataFinal": fim.strftime("%Y%m%d"),
@@ -269,7 +281,8 @@ def coletar_pncp(de: date, ate: date, ibge: str, get: GetFn | None = None) -> in
             if compra.modalidade_id not in (8, 9):
                 _atualizar_competicao(get, compra)
         db.session.commit()
-        log.status = "ok"
+        log.status = "parcial" if falhas else "ok"
+        log.erro = "\n".join(falhas[:20]) or None
     except Exception as exc:  # registra a falha e repassa
         db.session.rollback()
         log = ColetaLog(fonte="pncp", inicio=log.inicio, status="erro", erro=str(exc))

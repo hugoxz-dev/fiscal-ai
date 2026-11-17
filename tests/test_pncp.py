@@ -134,3 +134,26 @@ def test_coletar_pncp_com_api_falsa_e_idempotente(app):
     assert {o.esfera for o in Orgao.query} == {"M"}
     assert Contrato.query.count() == 2
     assert Contratacao.query.count() >= 2
+
+
+def test_falha_de_rede_em_uma_consulta_nao_derruba_a_coleta(app):
+    import requests
+
+    from app.models import ColetaLog
+
+    contratacoes = carregar("pncp_contratacoes.json")
+
+    def get_instavel(url, params=None):
+        if url.endswith("/contratacoes/publicacao"):
+            if params["codigoModalidadeContratacao"] == 8:
+                raise requests.ConnectionError("Read timed out")
+            return contratacoes if params["codigoModalidadeContratacao"] == 6 else None
+        if url.endswith("/contratos"):
+            raise requests.ConnectionError("Read timed out")
+        return None
+
+    n = coletar_pncp(date(2025, 3, 1), date(2025, 3, 15), "2111300", get=get_instavel)
+    assert n == 2  # as duas contratações municipais da modalidade 6
+    assert Contratacao.query.count() == 2
+    log = ColetaLog.query.order_by(ColetaLog.id.desc()).first()
+    assert log.status == "parcial" and "Read timed out" in log.erro
