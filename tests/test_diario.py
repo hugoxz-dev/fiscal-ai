@@ -86,14 +86,14 @@ def test_valor_muito_diferente_nao_vincula(app):
     assert vincular_extratos() == 0
 
 
-def test_aditivo_de_fornecedor_com_contrato_unico_vira_aditivo(app):
-    c = _contrato()
+def test_extrato_de_aditivo_nao_vira_aditivo_nem_vincula(app):
+    # O valor do extrato de aditivo é o valor global, não o acréscimo, e o número do contrato
+    # aditado nem sempre é o do PNCP: virar Aditivo gerava alertas falsos (revisão final).
+    _contrato()
     _extrato(tipo="aditivo", documento_fornecedor="12345678000199", valor=Decimal("30000.00"))
     db.session.commit()
-    assert vincular_extratos() == 1
-    a = Aditivo.query.one()
-    assert a.contrato_id == c.id and a.origem == "diario" and a.valor_acrescimo == Decimal("30000.00")
-    assert vincular_extratos() == 0  # idempotente
+    assert vincular_extratos() == 0
+    assert Aditivo.query.count() == 0
 
 
 def test_aditivo_ambiguo_nao_vincula(app):

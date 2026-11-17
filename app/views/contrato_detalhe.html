@@ -11,7 +11,7 @@
 </div>
 
 <dl class="dados">
-  <div><dt>Fornecedor</dt><dd><a href="{{ url_for('fornecedores.detalhe', documento=c.fornecedor.documento) }}">{{ c.fornecedor.nome }}</a><br>{{ c.fornecedor.documento | cnpj }}</dd></div>
+  <div><dt>Fornecedor</dt><dd><a href="{{ url_for('fornecedores.detalhe', id=c.fornecedor.id) }}">{{ c.fornecedor.nome }}</a><br>{{ c.fornecedor.documento | cnpj }}</dd></div>
   <div><dt>Órgão contratante</dt><dd>{{ c.orgao.razao_social }}</dd></div>
   <div><dt>Valor global</dt><dd>{{ c.valor_global | moeda }}</dd></div>
   <div><dt>Valor inicial</dt><dd>{{ c.valor_inicial | moeda }}</dd></div>

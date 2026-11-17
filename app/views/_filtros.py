@@ -39,7 +39,7 @@ ROTULOS_EVIDENCIA = {
     "ano": "Ano", "contratos": "Contratos somados (ids)", "valores": "Valores somados", "criterios": "Critérios",
     "data_abertura": "Abertura da empresa", "meses_entre_abertura_e_contrato": "Meses entre abertura e contrato",
     "capital_social": "Capital social", "valor_contrato": "Valor do contrato", "objeto": "Objeto",
-    "cnae": "Atividade principal (CNAE)", "justificativa": "Justificativa do modelo", "modelo": "Modelo de linguagem",
+    "cnae": "Atividade principal (CNAE)", "cnaes_secundarios": "Atividades secundárias", "amparo_legal": "Fundamento legal", "justificativa": "Justificativa do modelo", "modelo": "Modelo de linguagem",
     "sancoes": "Sanções vigentes", "percentual": "Percentual (%)", "total_orgao": "Total do órgão no ano",
     "total_fornecedor": "Total do fornecedor no ano", "contratos_orgao": "Contratos do órgão no ano",
     "criterio": "Critério", "contratacao": "Licitação", "modalidade": "Modalidade",

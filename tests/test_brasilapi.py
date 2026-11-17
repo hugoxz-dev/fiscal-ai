@@ -51,3 +51,12 @@ def test_cnpj_nao_encontrado_marca_e_segue(app):
     assert enriquecer_fornecedores(get=lambda url, params=None: None, pausa=0) == 0
     f = Fornecedor.query.one()
     assert f.enriquecido_em is not None and f.data_abertura is None
+
+
+def test_parse_cnpj_atividades_secundarias_e_natureza():
+    import json
+    from pathlib import Path
+
+    d = parse_cnpj(json.loads((Path(__file__).parent / "fixtures" / "brasilapi_cnpj.json").read_text(encoding="utf-8")))
+    assert d["cnaes_secundarios"].startswith("Impressão de material para uso publicitário; ")
+    assert d["natureza_juridica"] == "2062"

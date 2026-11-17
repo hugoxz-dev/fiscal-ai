@@ -64,3 +64,36 @@ def test_fracionamento_ignora_dispensa_que_ja_passa_do_limite(fazer_contrato):
     grande = fazer_contrato(modalidade_id=8, valor_global=Decimal("70000"))
     fazer_contrato(modalidade_id=8, valor_global=Decimal("10000"))
     assert Fracionamento(PESOS).avaliar(grande, _ctx()) is None
+
+
+def _com_amparo(fazer_contrato, amparo, **kw):
+    from app.models import Contratacao
+
+    c = fazer_contrato(**kw)
+    c.contratacao = Contratacao(numero_controle_pncp=f"X-{c.id}", orgao=c.orgao, amparo_legal=amparo)
+    db_commit()
+    return c
+
+
+def db_commit():
+    from app.extensions import db
+
+    db.session.commit()
+
+
+def test_dispensa_emergencial_nao_tem_limite_de_valor(fazer_contrato, ctx_vazio):
+    c = _com_amparo(fazer_contrato, "Lei 14.133/2021, Art. 75, VIII", modalidade_id=8, valor_global=Decimal("423070"))
+    assert DispensaLimite(PESOS).avaliar(c, ctx_vazio) is None
+
+
+def test_dispensa_por_valor_inciso_ii_dispara(fazer_contrato, ctx_vazio):
+    c = _com_amparo(fazer_contrato, "Lei 14.133/2021, Art. 75, II", modalidade_id=8, valor_global=Decimal("70000"))
+    r = DispensaLimite(PESOS).avaliar(c, ctx_vazio)
+    assert r is not None and r.evidencia["amparo_legal"] == "Lei 14.133/2021, Art. 75, II"
+
+
+def test_fracionamento_ignora_dispensa_sem_limite_de_valor(fazer_contrato):
+    for _ in range(3):
+        _com_amparo(fazer_contrato, "Lei 14.133/2021, Art. 75, VIII", modalidade_id=8, valor_global=Decimal("30000"))
+    ctx = _ctx()
+    assert all(Fracionamento(PESOS).avaliar(c, ctx) is None for c in ctx.contratos)

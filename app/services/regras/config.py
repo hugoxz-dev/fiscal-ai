@@ -2,8 +2,9 @@
 from decimal import Decimal
 
 # Lei 14.133/2021, art. 75, I (obras/serviços de engenharia) e II (demais compras/serviços).
-# Valores atualizados pelo Decreto 12.343/2024 — conferir o decreto vigente antes de cada ano.
+# 2024: Decreto 11.871/2023; 2025: Decreto 12.343/2024 — conferir o decreto vigente antes de cada ano.
 LIMITES_DISPENSA = {
+    2024: {"obras": Decimal("119812.02"), "geral": Decimal("59906.02")},
     2025: {"obras": Decimal("125451.15"), "geral": Decimal("62725.59")},
 }
 

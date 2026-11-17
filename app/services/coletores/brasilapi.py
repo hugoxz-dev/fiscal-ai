@@ -25,6 +25,9 @@ def parse_cnpj(d: dict) -> dict:
         "cnae_codigo": str(d["cnae_fiscal"]) if d.get("cnae_fiscal") else None,
         "cnae_descricao": d.get("cnae_fiscal_descricao"),
         "situacao": d.get("descricao_situacao_cadastral"),
+        "cnaes_secundarios": "; ".join(c["descricao"] for c in d.get("cnaes_secundarios") or []
+                                       if c.get("descricao")) or None,
+        "natureza_juridica": str(d["codigo_natureza_juridica"]) if d.get("codigo_natureza_juridica") else None,
     }
 
 

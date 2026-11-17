@@ -137,3 +137,44 @@ def test_capital_zero_e_tratado_como_nao_informado(fazer_contrato, ctx_vazio):
     # Associações e cooperativas não têm capital social: a Receita devolve 0.
     c = fazer_contrato(fornecedor=_pj(capital_social=Decimal("0.00")), valor_global=Decimal("100000"))
     assert FornecedorNovo(PESOS).avaliar(c, ctx_vazio) is None
+
+
+def test_cnae_sem_llm_usa_julgamento_guardado(fazer_contrato, ctx_vazio):
+    c = fazer_contrato(fornecedor=_pj(), objeto="Pavimentação asfáltica")
+    CnaeIncompativel(PESOS).avaliar(c, Contexto([], {}, LLMFalso((False, "papelaria não faz asfalto"))))
+    r = CnaeIncompativel(PESOS).avaliar(c, ctx_vazio)
+    assert r is not None and r.evidencia["justificativa"] == "papelaria não faz asfalto"
+    assert r.evidencia["modelo"] == "qwen2.5:7b"
+
+
+def test_cnae_julgamento_refeito_se_objeto_mudar(fazer_contrato):
+    c = fazer_contrato(fornecedor=_pj(), objeto="Pavimentação asfáltica")
+    llm = LLMContador((True, "ok"))
+    CnaeIncompativel(PESOS).avaliar(c, Contexto([], {}, llm))
+    c.objeto = "Material de escritório"
+    CnaeIncompativel(PESOS).avaliar(c, Contexto([], {}, llm))
+    assert llm.chamadas == 2
+
+
+class LLMEspiao(LLMFalso):
+    def cnae_compativel(self, objeto, cnae):
+        self.recebido = cnae
+        return self.resposta
+
+
+def test_cnae_envia_atividades_secundarias(fazer_contrato):
+    f = _pj(cnaes_secundarios="Comércio varejista de móveis")
+    c = fazer_contrato(fornecedor=f, objeto="Fornecimento de mobiliário escolar")
+    llm = LLMEspiao((True, "ok"))
+    CnaeIncompativel(PESOS).avaliar(c, Contexto([], {}, llm))
+    assert "Comércio varejista de móveis" in llm.recebido and "material de escritório" in llm.recebido
+
+
+def test_cnae_nao_julga_associacao_nem_cooperativa(fazer_contrato):
+    llm = LLMContador((False, "x"))
+    for i, natureza in enumerate(("3999", "2143")):
+        f = _pj(documento=f"1122233300014{i}", natureza_juridica=natureza,
+                cnae_descricao="Atividades de associações de defesa de direitos sociais")
+        c = fazer_contrato(fornecedor=f, objeto="Gêneros alimentícios da agricultura familiar (PNAE)")
+        assert CnaeIncompativel(PESOS).avaliar(c, Contexto([], {}, llm)) is None
+    assert llm.chamadas == 0

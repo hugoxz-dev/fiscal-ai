@@ -29,12 +29,15 @@ TRECHO:
 {trecho}"""
 
 PROMPT_CNAE = """Um órgão público contratou uma empresa para o objeto abaixo.
-A atividade econômica principal (CNAE) da empresa é informada a seguir.
+As atividades econômicas (CNAE principal e secundárias) da empresa são informadas a seguir.
 Responda SOMENTE com JSON: {{"compativel": true ou false, "justificativa": "uma frase"}}
-Considere compatível se a atividade da empresa razoavelmente inclui fornecer esse objeto.
+Considere compatível se QUALQUER uma das atividades razoavelmente inclui fornecer esse objeto.
+Quem fabrica, comercializa (atacado ou varejo) ou distribui um bem pode fornecê-lo.
+Só responda false quando nenhuma atividade tiver relação com o objeto.
 
 OBJETO: {objeto}
-CNAE: {cnae}"""
+ATIVIDADES:
+{cnae}"""
 
 PROMPT_EXPLICAR = """Você é um assistente de controle social de gastos públicos.
 Escreva em português do Brasil um texto de 3 a 6 frases explicando, para um cidadão comum,

@@ -94,11 +94,28 @@ def test_contrato_inexistente_404(client, base):
 
 
 def test_pagina_fornecedor(client, base):
-    html = client.get("/fornecedores/11222333000144").get_data(as_text=True)
+    html = client.get(f"/fornecedores/{Fornecedor.query.filter_by(documento='11222333000144').one().id}").get_data(as_text=True)
     assert "CONSTRUTORA NOVA LTDA" in html and "11.222.333/0001-44" in html
     assert "CEIS" in html and "Reparo de telhado" in html
     assert "%" in html  # concentração no órgão
 
 
 def test_fornecedor_404(client, base):
-    assert client.get("/fornecedores/00000000000000").status_code == 404
+    assert client.get("/fornecedores/99999").status_code == 404
+
+
+def test_cpf_nunca_aparece_completo_nem_em_links(client, fazer_contrato):
+    pf = Fornecedor(documento="12345678901", nome="AGRICULTOR FULANO", tipo="PF")
+    c = fazer_contrato(fornecedor=pf, objeto="Feijão PNAE")
+    analisar_todos(None)
+    for url in ("/", "/contratos", f"/contratos/{c.id}", f"/fornecedores/{pf.id}"):
+        html = client.get(url).get_data(as_text=True)
+        assert "12345678901" not in html, url
+    assert client.get("/fornecedores/12345678901").status_code == 404
+
+
+def test_busca_por_digitos_nao_encontra_cpf(client, fazer_contrato):
+    pf = Fornecedor(documento="12345678901", nome="AGRICULTOR FULANO", tipo="PF")
+    fazer_contrato(fornecedor=pf, objeto="Feijão PNAE")
+    html = client.get("/contratos?fornecedor=45678901").get_data(as_text=True)
+    assert "Feijão PNAE" not in html

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from decimal import Decimal
 
 from ...models import Contrato
@@ -16,17 +17,36 @@ def limite_dispensa(contrato: Contrato) -> tuple[Decimal, str]:
     return tabela[categoria], categoria
 
 
+_INCISO = re.compile(r"art\.?\s*75\s*,?\s*(?:inciso\s*)?([IVXL]+)\b", re.IGNORECASE)
+
+
+def amparo_legal(contrato: Contrato) -> str | None:
+    return contrato.contratacao.amparo_legal if contrato.contratacao else None
+
+
+def dispensa_por_valor(contrato: Contrato) -> bool:
+    """Dispensa do art. 75, I ou II (as únicas com teto de valor). Amparo desconhecido conta como sim."""
+    if contrato.modalidade_id != MODALIDADE_DISPENSA:
+        return False
+    amparo = amparo_legal(contrato)
+    if not amparo:
+        return True
+    m = _INCISO.search(amparo)
+    return m is None or m.group(1).upper() in ("I", "II")
+
+
 class DispensaLimite(Regra):
     codigo = "dispensa_limite"
     nome = "Dispensa acima do limite legal"
     base_legal = "Lei 14.133/2021, art. 75, I e II"
-    descricao = "Contratação por dispensa de licitação com valor acima do limite permitido para a categoria."
+    descricao = ("Contratação por dispensa de valor (art. 75, I ou II) acima do limite permitido para a "
+                 "categoria. Dispensas por outros motivos (emergência, por exemplo) não têm teto de valor.")
 
     def avaliar(self, contrato: Contrato, ctx: Contexto) -> Resultado | None:
-        if contrato.modalidade_id != MODALIDADE_DISPENSA or contrato.valor_global is None:
+        if not dispensa_por_valor(contrato) or contrato.valor_global is None:
             return None
         limite, categoria = limite_dispensa(contrato)
         if contrato.valor_global <= limite:
             return None
         return self.resultado(contrato, {"valor": fmt(contrato.valor_global), "limite": fmt(limite),
-                                         "categoria": categoria})
+                                         "categoria": categoria, "amparo_legal": amparo_legal(contrato)})

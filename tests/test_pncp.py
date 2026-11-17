@@ -157,3 +157,7 @@ def test_falha_de_rede_em_uma_consulta_nao_derruba_a_coleta(app):
     assert Contratacao.query.count() == 2
     log = ColetaLog.query.order_by(ColetaLog.id.desc()).first()
     assert log.status == "parcial" and "Read timed out" in log.erro
+
+
+def test_parse_contratacao_guarda_amparo_legal(fixture_contratacoes):
+    assert parse_contratacao(fixture_contratacoes[0])["amparo_legal"] == "Lei 14.133/2021, Art. 28, I"

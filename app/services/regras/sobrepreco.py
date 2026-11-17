@@ -16,6 +16,10 @@ STOP_WORDS = ["a", "o", "as", "os", "de", "da", "do", "das", "dos", "e", "em", "
               "contratacao", "empresa", "aquisicao", "prestacao", "servicos", "servico"]
 
 
+def _tipo(c: Contrato) -> str | None:
+    return c.fornecedor.tipo if c.fornecedor else None
+
+
 class Sobrepreco(Regra):
     codigo = "sobrepreco"
     nome = "Valor fora do padrão"
@@ -38,7 +42,9 @@ class Sobrepreco(Regra):
         sim = cosine_similarity(matriz)
         limiar = PARAMS["sobrepreco_similaridade"]
         for i, c in enumerate(contratos):
-            self._pares[c.id] = [contratos[j] for j in range(len(contratos)) if j != i and sim[i, j] >= limiar]
+            # PJ só com PJ e PF só com PF: cota de agricultor (PF) não é parâmetro para associação (PJ)
+            self._pares[c.id] = [contratos[j] for j in range(len(contratos)) if j != i and sim[i, j] >= limiar
+                                 and _tipo(contratos[j]) == _tipo(c)]
 
     def avaliar(self, contrato: Contrato, ctx: Contexto) -> Resultado | None:
         pares = self._pares.get(contrato.id, [])

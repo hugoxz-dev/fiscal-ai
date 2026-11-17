@@ -58,6 +58,7 @@ def parse_contratacao(item: dict) -> dict:
         "sequencial": seq,
         "modalidade_id": item.get("modalidadeId"),
         "modalidade_nome": item.get("modalidadeNome"),
+        "amparo_legal": (item.get("amparoLegal") or {}).get("nome"),
         "objeto": item.get("objetoCompra"),
         "valor_estimado": _dinheiro(item.get("valorTotalEstimado")),
         "valor_homologado": _dinheiro(item.get("valorTotalHomologado")),
@@ -137,7 +138,7 @@ def upsert_contratacao(d: dict) -> Contratacao:
         c = Contratacao(numero_controle_pncp=d["numero_controle_pncp"], orgao=orgao)
         db.session.add(c)
     c.orgao = orgao
-    for campo in ("ano", "sequencial", "modalidade_id", "modalidade_nome", "objeto",
+    for campo in ("ano", "sequencial", "modalidade_id", "modalidade_nome", "amparo_legal", "objeto",
                   "valor_estimado", "valor_homologado", "data_publicacao", "link_pncp"):
         setattr(c, campo, d[campo])
     return c

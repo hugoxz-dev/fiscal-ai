@@ -12,6 +12,8 @@ class Fornecedor(db.Model):
     capital_social = db.Column(Dinheiro)
     cnae_codigo = db.Column(db.String(10))
     cnae_descricao = db.Column(db.String(255))
+    cnaes_secundarios = db.Column(db.Text)
+    natureza_juridica = db.Column(db.String(10))  # código da Receita (ex.: 2062 Ltda, 3999 associação)
     situacao = db.Column(db.String(50))
     enriquecido_em = db.Column(db.DateTime)
 

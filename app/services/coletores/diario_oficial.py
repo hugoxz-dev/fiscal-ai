@@ -22,7 +22,7 @@ from bs4 import BeautifulSoup
 from flask import current_app
 
 from ...extensions import db
-from ...models import Aditivo, Contrato, ExtratoDiario, Fornecedor, PublicacaoDiario
+from ...models import Contrato, ExtratoDiario, Fornecedor, PublicacaoDiario
 from ..http import criar_sessao, get_json
 
 BASE = "https://diariooficial.saoluis.ma.gov.br"
@@ -79,20 +79,16 @@ def _mesmo_fornecedor(extrato: ExtratoDiario, f: Fornecedor) -> bool:
 
 
 def vincular_extratos() -> int:
-    """Liga extratos a contratos do PNCP. Extratos de aditivo viram Aditivo(origem='diario')."""
+    """Liga extratos de contrato/dispensa/inexigibilidade a contratos do PNCP (fornecedor + valor ±1%).
+
+    Extratos de aditivo não são ligados: o valor publicado costuma ser o global (não o acréscimo) e o
+    número do contrato aditado nem sempre corresponde ao do PNCP — usar isso gerava alertas falsos.
+    """
     vinculados = 0
     contratos = Contrato.query.all()
     for e in ExtratoDiario.query.filter(ExtratoDiario.contrato_id.is_(None)).all():
         candidatos = [c for c in contratos if _mesmo_fornecedor(e, c.fornecedor)]
-        if e.tipo == "aditivo":
-            if len(candidatos) != 1 or e.valor is None:
-                continue
-            c = candidatos[0]
-            numero = f"DOM-{e.id}"
-            if not any(a.numero == numero and a.origem == "diario" for a in c.aditivos):
-                c.aditivos.append(Aditivo(numero=numero, valor_acrescimo=e.valor,
-                                          data=e.publicacao.data_edicao, origem="diario"))
-        elif e.tipo in ("contrato", "dispensa", "inexigibilidade") and e.valor is not None:
+        if e.tipo in ("contrato", "dispensa", "inexigibilidade") and e.valor is not None:
             candidatos = [c for c in candidatos if c.valor_global and
                           abs(e.valor - c.valor_global) <= c.valor_global * TOLERANCIA_VALOR]
             if len(candidatos) != 1:

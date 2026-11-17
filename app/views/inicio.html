@@ -27,7 +27,7 @@
         <tr>
           <td><span class="selo nivel-{{ c.nivel }}{{ " zero" if c.score == 0 }}" title="Risco {{ c.nivel|lower }}">{{ c.score }}</span></td>
           <td class="objeto"><a href="/contratos/{{ c.id }}">{{ c.objeto|truncate(140) }}</a></td>
-          <td><a href="/fornecedores/{{ c.fornecedor.documento }}">{{ c.fornecedor.nome }}</a></td>
+          <td><a href="{{ url_for('fornecedores.detalhe', id=c.fornecedor.id) }}">{{ c.fornecedor.nome }}</a></td>
           <td class="valor">{{ c.valor_global | moeda }}</td>
           <td>{{ c.data_assinatura | data_br }}</td>
         </tr>

@@ -11,6 +11,7 @@ class Contratacao(db.Model):
     sequencial = db.Column(db.Integer)
     modalidade_id = db.Column(db.Integer)
     modalidade_nome = db.Column(db.String(80))
+    amparo_legal = db.Column(db.String(255))  # ex.: "Lei 14.133/2021, Art. 75, II"
     objeto = db.Column(db.Text)
     valor_estimado = db.Column(Dinheiro)
     valor_homologado = db.Column(Dinheiro)

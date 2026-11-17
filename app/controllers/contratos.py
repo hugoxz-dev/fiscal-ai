@@ -1,7 +1,7 @@
 from datetime import date
 
 from flask import Blueprint, abort, render_template, request
-from sqlalchemy import or_
+from sqlalchemy import and_, or_
 
 from ..extensions import db
 from ..models import Contrato, Fornecedor, Orgao
@@ -53,7 +53,8 @@ def lista():
         digitos = "".join(c for c in f["fornecedor"] if c.isdigit())
         condicoes = [Fornecedor.nome.ilike(f"%{f['fornecedor']}%")]
         if len(digitos) >= 3:
-            condicoes.append(Fornecedor.documento.like(f"%{digitos}%"))
+            # só CNPJ: busca por dígitos de CPF permitiria confirmar o CPF de uma pessoa física
+            condicoes.append(and_(Fornecedor.tipo == "PJ", Fornecedor.documento.like(f"%{digitos}%")))
         q = q.filter(or_(*condicoes))
     q = q.order_by(ORDENS[f["ordem"]].desc(), Contrato.id.desc())
     paginacao = q.paginate(page=pagina, per_page=POR_PAGINA, error_out=False)

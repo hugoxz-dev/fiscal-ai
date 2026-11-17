@@ -2,8 +2,7 @@ from __future__ import annotations
 
 from ...models import Contrato
 from .base import Contexto, Regra, Resultado, fmt
-from .config import MODALIDADE_DISPENSA
-from .dispensa import limite_dispensa
+from .dispensa import dispensa_por_valor, limite_dispensa
 
 
 class Fracionamento(Regra):
@@ -14,13 +13,13 @@ class Fracionamento(Regra):
                  "limite, mas que somadas o ultrapassam.")
 
     def avaliar(self, contrato: Contrato, ctx: Contexto) -> Resultado | None:
-        if contrato.modalidade_id != MODALIDADE_DISPENSA or not contrato.data_assinatura:
+        if not dispensa_por_valor(contrato) or not contrato.data_assinatura:
             return None
         limite, _ = limite_dispensa(contrato)
         if contrato.valor_global is None or contrato.valor_global > limite:
             return None
         grupo = [c for c in ctx.contratos
-                 if c.modalidade_id == MODALIDADE_DISPENSA and c.orgao_id == contrato.orgao_id
+                 if dispensa_por_valor(c) and c.orgao_id == contrato.orgao_id
                  and c.fornecedor_id == contrato.fornecedor_id and c.data_assinatura
                  and c.data_assinatura.year == contrato.data_assinatura.year
                  and c.valor_global is not None and c.valor_global <= limite]

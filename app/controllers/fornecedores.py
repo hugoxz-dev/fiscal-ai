@@ -2,15 +2,17 @@ from collections import defaultdict
 
 from flask import Blueprint, abort, render_template
 
+from ..extensions import db
 from ..models import Contrato, Fornecedor, Sancao
 
 bp = Blueprint("fornecedores", __name__)
 
 
-@bp.route("/fornecedores/<documento>")
-def detalhe(documento):
-    f = Fornecedor.query.filter_by(documento=documento).first() or abort(404)
-    sancoes = Sancao.query.filter_by(documento=documento).order_by(Sancao.data_inicio.desc()).all()
+@bp.route("/fornecedores/<int:id>")
+def detalhe(id):
+    # rota pelo id interno: o CPF de pessoa física nunca vai para a URL
+    f = db.session.get(Fornecedor, id) or abort(404)
+    sancoes = Sancao.query.filter_by(documento=f.documento).order_by(Sancao.data_inicio.desc()).all()
     contratos = sorted(f.contratos, key=lambda c: -c.score)
     # participação do fornecedor no total contratado por órgão e ano
     concentracao = []

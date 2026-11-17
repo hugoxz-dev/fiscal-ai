@@ -46,3 +46,14 @@ def test_objetos_diferentes_nao_sao_pares(fazer_contrato):
 def test_sem_preparar_nao_quebra(fazer_contrato, ctx_vazio):
     c = fazer_contrato(objeto=MERENDA)
     assert Sobrepreco(PESOS).avaliar(c, ctx_vazio) is None
+
+
+def test_associacao_nao_e_comparada_com_agricultor_pessoa_fisica(fazer_contrato):
+    from app.models import Fornecedor
+
+    pnae = "Chamada pública aquisição de gêneros alimentícios da agricultura familiar"
+    for i in range(6):
+        pf = Fornecedor(documento=f"1234567890{i}", nome=f"AGRICULTOR {i}", tipo="PF")
+        fazer_contrato(fornecedor=pf, objeto=pnae, valor_global=Decimal("20000"))
+    assoc = fazer_contrato(objeto=pnae, valor_global=Decimal("120000"))
+    assert _avaliar_todos()[assoc.id] is None

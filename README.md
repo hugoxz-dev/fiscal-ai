@@ -74,7 +74,8 @@ Tempos de referência: o PNCP leva cerca de 3 minutos por mês de dados, e o Di�
 ```
 app/
   models/        M — tabelas (SQLAlchemy): orgao, fornecedor, contratacao, contrato, aditivo,
-                     publicacao_diario, extrato_diario, sancao, alerta, convenio, coleta_log
+                     publicacao_diario, extrato_diario, sancao, alerta, convenio, coleta_log,
+                     julgamento_cnae (cache das respostas do LLM)
   views/         V — templates Jinja2 (Bootstrap 5 + Chart.js) e filtros de formatação
   controllers/   C — rotas Flask: painel, contratos, fornecedores, metodologia
   services/
@@ -95,7 +96,7 @@ sql/schema.sql   DDL para o Workbench / monografia
 
 | Regra | Pontos | Base legal |
 |---|---|---|
-| Dispensa acima do limite legal | 25 | Lei 14.133/2021, art. 75 |
+| Dispensa de valor acima do limite legal | 25 | Lei 14.133/2021, art. 75, I e II |
 | Possível fracionamento de despesa | 20 | art. 75, §1º |
 | Fornecedor recém-criado ou com capital baixo | 20 | art. 69 |
 | Atividade (CNAE) incompatível com o objeto (LLM) | 10 | art. 67 |
@@ -118,5 +119,9 @@ pytest
 - O PNCP publica só o vencedor de cada item, não o número de participantes. A regra de competição usa uma aproximação (licitações com vários itens vencidas por um único fornecedor).
 - No PNCP, todas as secretarias aparecem sob o CNPJ do Município, por isso a comparação é por órgão contratante.
 - Extratos do Diário Oficial nem sempre trazem o CNPJ. A ligação com o contrato usa o nome do fornecedor e o valor (±1%).
+- Extratos de **aditivo** do Diário são guardados, mas não entram na regra de aditivos: o valor publicado costuma ser o global, não o acréscimo, e o contrato aditado nem sempre é identificável. A regra usa só os termos aditivos do PNCP.
+- Dispensas por emergência e outros incisos do art. 75 sem teto de valor não entram nas regras de dispensa e fracionamento (o fundamento vem do campo `amparoLegal` do PNCP).
+- O valor fora do padrão compara pessoa jurídica com pessoa jurídica e pessoa física com pessoa física (cotas individuais de agricultores do PNAE não servem de parâmetro para associações).
+- O CNPJ/CPF não aparece em URLs; CPFs são mascarados e não podem ser buscados.
 - Capital social 0 (associações e cooperativas, comuns na merenda escolar) é tratado como não informado.
-- A compatibilidade entre CNAE e objeto é um julgamento do modelo de linguagem e pode errar.
+- A compatibilidade entre CNAE e objeto é um julgamento do modelo de linguagem e pode errar. O modelo recebe o CNAE principal e os secundários; associações e cooperativas não são avaliadas. Os julgamentos ficam guardados, então `flask analisar` sem o Ollama dá o mesmo resultado.
