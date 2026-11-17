@@ -32,10 +32,24 @@ def _coletar_cnpj(de: date, ate: date, cfg) -> int:
     return enriquecer_fornecedores()
 
 
+def _coletar_sancoes(de: date, ate: date, cfg) -> int:
+    from .services.coletores.transparencia import coletar_sancoes
+
+    return coletar_sancoes()
+
+
+def _coletar_convenios(de: date, ate: date, cfg) -> int:
+    from .services.coletores.transparencia import coletar_convenios
+
+    return coletar_convenios(de, ate, cfg["IBGE_MUNICIPIO"])
+
+
 # Ordem importa em "todas": contratos antes de enriquecer CNPJ e sanções.
 FONTES = {
     "pncp": _coletar_pncp,
     "cnpj": _coletar_cnpj,
+    "sancoes": _coletar_sancoes,
+    "convenios": _coletar_convenios,
 }
 
 
