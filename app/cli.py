@@ -44,12 +44,23 @@ def _coletar_convenios(de: date, ate: date, cfg) -> int:
     return coletar_convenios(de, ate, cfg["IBGE_MUNICIPIO"])
 
 
+def _coletar_diario(de: date, ate: date, cfg) -> int:
+    from .services.coletores.diario_oficial import coletar_diario
+    from .services.llm import get_llm
+
+    llm = get_llm()
+    if not llm.disponivel():
+        click.echo("Ollama indisponível — edições serão baixadas e os extratos ficam pendentes.")
+    return coletar_diario(de, ate, llm)
+
+
 # Ordem importa em "todas": contratos antes de enriquecer CNPJ e sanções.
 FONTES = {
     "pncp": _coletar_pncp,
     "cnpj": _coletar_cnpj,
     "sancoes": _coletar_sancoes,
     "convenios": _coletar_convenios,
+    "diario": _coletar_diario,
 }
 
 

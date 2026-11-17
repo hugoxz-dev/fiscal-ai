@@ -20,6 +20,7 @@ PROMPT_EXTRATO = """Você lê trechos do Diário Oficial do Município de São L
 Extraia os dados do trecho abaixo e responda SOMENTE com JSON no formato:
 {{"tipo": "contrato|dispensa|inexigibilidade|aditivo|outro",
   "documento_fornecedor": "CNPJ ou CPF do contratado, ou null",
+  "nome_fornecedor": "razão social ou nome do contratado, ou null",
   "valor": "valor total em reais, ou null",
   "objeto": "objeto resumido em uma frase, ou null"}}
 Não invente dados: use null quando a informação não estiver no trecho.
@@ -99,6 +100,7 @@ class OllamaClient:
         return {
             "tipo": tipo if tipo in TIPOS_EXTRATO else "outro",
             "documento_fornecedor": _so_digitos(d.get("documento_fornecedor")),
+            "nome_fornecedor": (str(d.get("nome_fornecedor") or "").strip() or None),
             "valor": _valor(d.get("valor")),
             "objeto": d.get("objeto") or None,
         }

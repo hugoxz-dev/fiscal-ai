@@ -20,6 +20,7 @@ class ExtratoDiario(db.Model):
     publicacao_id = db.Column(db.Integer, db.ForeignKey("publicacao_diario.id"), nullable=False)
     tipo = db.Column(db.String(20), nullable=False)
     documento_fornecedor = db.Column(db.String(14))
+    nome_fornecedor = db.Column(db.String(255))
     valor = db.Column(Dinheiro)
     objeto = db.Column(db.Text)
     trecho = db.Column(db.Text)

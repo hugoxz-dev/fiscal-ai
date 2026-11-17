@@ -139,6 +139,7 @@ CREATE TABLE extrato_diario (
 	publicacao_id INTEGER NOT NULL, 
 	tipo VARCHAR(20) NOT NULL, 
 	documento_fornecedor VARCHAR(14), 
+	nome_fornecedor VARCHAR(255), 
 	valor NUMERIC(15, 2), 
 	objeto TEXT, 
 	trecho TEXT, 

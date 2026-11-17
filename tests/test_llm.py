@@ -57,11 +57,11 @@ def test_gerar_json_envia_formato_e_temperatura_zero(monkeypatch):
 
 def test_extrair_normaliza(monkeypatch):
     resposta = json.dumps({"tipo": "Dispensa", "documento_fornecedor": "12.345.678/0001-99",
-                           "valor": "R$ 10.500,00", "objeto": "x"})
+                           "nome_fornecedor": " Ortopedia Brasil LTDA ", "valor": "R$ 10.500,00", "objeto": "x"})
     monkeypatch.setattr(llm_mod.requests, "post", _fake_post(resposta))
     r = cliente().extrair_extrato("trecho")
     assert r == {"tipo": "dispensa", "documento_fornecedor": "12345678000199",
-                 "valor": Decimal("10500.00"), "objeto": "x"}
+                 "nome_fornecedor": "Ortopedia Brasil LTDA", "valor": Decimal("10500.00"), "objeto": "x"}
 
 
 def test_extrair_tipo_desconhecido_vira_outro(monkeypatch):
