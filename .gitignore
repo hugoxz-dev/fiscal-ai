@@ -5,3 +5,4 @@ __pycache__/
 data/
 .superpowers/
 .pytest_cache/
+.pytest_tmp/
