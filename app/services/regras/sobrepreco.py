@@ -8,7 +8,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 from ...models import Contrato
 from .base import Contexto, Regra, Resultado, fmt
-from .config import PARAMS
+from .config import PALAVRAS_AGRICULTURA_FAMILIAR, PARAMS
 
 STOP_WORDS = ["a", "o", "as", "os", "de", "da", "do", "das", "dos", "e", "em", "na", "no", "nas", "nos",
               "para", "por", "com", "um", "uma", "ao", "aos", "que", "se", "sua", "seu", "conforme",
@@ -20,20 +20,27 @@ def _tipo(c: Contrato) -> str | None:
     return c.fornecedor.tipo if c.fornecedor else None
 
 
+def _agricultura_familiar(c: Contrato) -> bool:
+    objeto = c.objeto.lower()
+    return any(p in objeto for p in PALAVRAS_AGRICULTURA_FAMILIAR)
+
+
 class Sobrepreco(Regra):
     codigo = "sobrepreco"
     nome = "Valor fora do padrão"
     base_legal = "Lei 14.133/2021, art. 23 (preço compatível com o mercado); metodologia TCU de sobrepreço"
     descricao = (f"Valor maior que {PARAMS['sobrepreco_fator']:g}× a mediana de pelo menos "
                  f"{PARAMS['sobrepreco_min_pares']} contratos com objeto semelhante (similaridade TF-IDF ≥ "
-                 f"{PARAMS['sobrepreco_similaridade']:g}).")
+                 f"{PARAMS['sobrepreco_similaridade']:g}). Compras da agricultura familiar (PNAE) ficam de fora: "
+                 "o preço é fixado na chamada pública e o valor total reflete só a cota de cada fornecedor.")
 
     def __init__(self, pesos: dict):
         super().__init__(pesos)
         self._pares: dict[int, list[Contrato]] = {}
 
     def preparar(self, ctx: Contexto) -> None:
-        contratos = [c for c in ctx.contratos if c.objeto and c.valor_global and c.valor_global > 0]
+        contratos = [c for c in ctx.contratos if c.objeto and c.valor_global and c.valor_global > 0
+                     and not _agricultura_familiar(c)]
         self._pares = {}
         if len(contratos) < 2:
             return

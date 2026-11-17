@@ -17,6 +17,10 @@ PARAMS = {"meses_fornecedor_novo": 6, "capital_min_pct": 0.10, "concentracao_pct
 
 NIVEIS = [(60, "Alto"), (30, "Médio"), (0, "Baixo")]
 
+# Aquisições da agricultura familiar (PNAE, Lei 11.947/2009): o preço é fixado na chamada pública e há
+# teto anual por agricultor, então o valor total do contrato mede a cota, não o preço. Ficam fora do sobrepreço.
+PALAVRAS_AGRICULTURA_FAMILIAR = ["agricultura familiar", "pnae"]
+
 PALAVRAS_OBRAS = ["obra", "pavimenta", "constru", "reforma", "engenharia"]
 
 MODALIDADE_DISPENSA = 8

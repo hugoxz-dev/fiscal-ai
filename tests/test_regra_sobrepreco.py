@@ -57,3 +57,16 @@ def test_associacao_nao_e_comparada_com_agricultor_pessoa_fisica(fazer_contrato)
         fazer_contrato(fornecedor=pf, objeto=pnae, valor_global=Decimal("20000"))
     assoc = fazer_contrato(objeto=pnae, valor_global=Decimal("120000"))
     assert _avaliar_todos()[assoc.id] is None
+
+
+def test_chamada_publica_da_agricultura_familiar_fica_fora(fazer_contrato):
+    # PNAE: preço fixado pela chamada pública e teto anual por agricultor; o valor total mede só a cota.
+    from app.models import Fornecedor
+
+    pnae = "Chamada Pública para aquisição de gêneros alimentícios da agricultura familiar para o PNAE"
+    for i, v in enumerate(("15000", "18000", "18300", "20000", "17000", "16000")):
+        pf = Fornecedor(documento=f"1234567890{i}", nome=f"AGRICULTOR {i}", tipo="PF")
+        fazer_contrato(fornecedor=pf, objeto=pnae, valor_global=Decimal(v))
+    teto = fazer_contrato(fornecedor=Fornecedor(documento="12345678909", nome="AGRICULTOR 9", tipo="PF"),
+                          objeto=pnae, valor_global=Decimal("40000"))
+    assert _avaliar_todos()[teto.id] is None

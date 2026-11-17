@@ -122,7 +122,7 @@ pytest
 - Extratos do Diário Oficial nem sempre trazem o CNPJ. A ligação com o contrato usa o nome do fornecedor e o valor (±1%).
 - Extratos de **aditivo** do Diário são guardados, mas não entram na regra de aditivos: o valor publicado costuma ser o global, não o acréscimo, e o contrato aditado nem sempre é identificável. A regra usa só os termos aditivos do PNCP.
 - Dispensas por emergência e outros incisos do art. 75 sem teto de valor não entram nas regras de dispensa e fracionamento (o fundamento vem do campo `amparoLegal` do PNCP).
-- O valor fora do padrão compara pessoa jurídica com pessoa jurídica e pessoa física com pessoa física (cotas individuais de agricultores do PNAE não servem de parâmetro para associações).
+- O valor fora do padrão compara pessoa jurídica com pessoa jurídica e pessoa física com pessoa física (cotas individuais de agricultores do PNAE não servem de parâmetro para associações). Compras da agricultura familiar (PNAE) ficam fora dessa regra, porque o preço é fixado na chamada pública e o valor total mede só a cota.
 - O CNPJ/CPF não aparece em URLs; CPFs são mascarados e não podem ser buscados.
 - Capital social 0 (associações e cooperativas, comuns na merenda escolar) é tratado como não informado.
 - A compatibilidade entre CNAE e objeto é um julgamento do modelo de linguagem e pode errar. O modelo recebe o CNAE principal e os secundários; associações e cooperativas não são avaliadas. Os julgamentos ficam guardados, então `flask analisar` sem o Ollama dá o mesmo resultado.
