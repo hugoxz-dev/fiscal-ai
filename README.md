@@ -70,6 +70,15 @@ flask run                                                      # http://127.0.0.
 
 Tempos de referência: o PNCP leva cerca de 3 minutos por mês de dados, e o Diário cerca de 30 segundos por edição (download do PDF).
 
+## Validação dos alertas (capítulo de resultados)
+
+```bash
+flask validacao amostra --por-regra 5          # gera validacao.csv (abre no Excel)
+flask validacao resumo validacao.csv           # precisão por regra, em tabela Markdown
+```
+
+A amostra é sorteada com semente fixa (`--semente 42`), então a mesma base gera sempre a mesma planilha. Para cada linha, abra o link do painel e da fonte (PNCP), confira a evidência e preencha a coluna **veredito** com `acerto`, `falso positivo` ou `inconclusivo` (ou só `a`, `f`, `i`); use **observacao** para justificar. Precisão = acertos / (acertos + falsos positivos). As planilhas `validacao*.csv` ficam fora do git.
+
 ## Arquitetura (MVC)
 
 ```

@@ -106,5 +106,5 @@ def test_cli_analisar_sem_ollama(app, cenario, monkeypatch):
             return False
     monkeypatch.setattr(analisador, "get_llm", lambda: Indisponivel())
     out = app.test_cli_runner().invoke(args=["analisar"]).output
-    assert "Ollama indisponível — regra de CNAE ignorada" in out
+    assert "Ollama indisponível — regra de CNAE usa só os julgamentos já guardados" in out
     assert "Alto: 1" in out

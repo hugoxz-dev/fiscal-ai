@@ -98,7 +98,7 @@ def registrar_comandos(app: Flask) -> None:
 
         llm = analisador.get_llm()
         if not llm.disponivel():
-            click.echo("Ollama indisponível — regra de CNAE ignorada.")
+            click.echo("Ollama indisponível — regra de CNAE usa só os julgamentos já guardados.")
             llm = None
         r = analisador.analisar_todos(llm)
         click.echo(f"Contratos: {r['contratos']} | Alertas: {r['alertas']} | "
@@ -115,3 +115,33 @@ def registrar_comandos(app: Flask) -> None:
             click.echo("Ollama indisponível — nada a fazer. Inicie o Ollama e rode de novo.")
             return
         click.echo(f"Explicações geradas: {analisador.explicar_pendentes(llm, limite)}")
+
+    @app.cli.group("validacao")
+    def validacao():
+        """Validação manual dos alertas (amostra para conferir e resumo da precisão)."""
+
+    @validacao.command("amostra")
+    @click.option("--por-regra", default=5, show_default=True, help="Alertas sorteados de cada regra")
+    @click.option("--semente", default=42, show_default=True, help="Semente do sorteio (mesma amostra sempre)")
+    @click.option("--saida", default="validacao.csv", show_default=True, type=click.Path(dir_okay=False))
+    @click.option("--url-painel", default="http://127.0.0.1:5000", show_default=True)
+    def amostra(por_regra, semente, saida, url_painel):
+        """Gera a planilha (CSV para o Excel) com uma amostra de alertas para conferência manual."""
+        from .services.validacao import gravar_amostra, sortear_alertas
+
+        alertas = sortear_alertas(por_regra, semente)
+        gravar_amostra(saida, alertas, url_painel)
+        click.echo(f"{len(alertas)} alertas gravados em {saida}. Preencha a coluna 'veredito' com "
+                   "acerto, falso positivo ou inconclusivo e rode: flask validacao resumo " + saida)
+
+    @validacao.command("resumo")
+    @click.argument("planilha", type=click.Path(exists=True, dir_okay=False))
+    def resumo(planilha):
+        """Lê a planilha preenchida e mostra a precisão de cada regra (tabela pronta para a monografia)."""
+        from .services.validacao import ErroValidacao, resumir, tabela_markdown
+
+        try:
+            click.echo(tabela_markdown(resumir(planilha)))
+        except ErroValidacao as e:
+            raise click.ClickException(str(e))
+        click.echo("\nPrecisão = acertos / (acertos + falsos positivos); inconclusivos e pendentes ficam fora.")
