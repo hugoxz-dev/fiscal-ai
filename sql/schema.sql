@@ -131,7 +131,7 @@ CREATE TABLE despesa_parlamentar (
 	documento VARCHAR(14), 
 	valor NUMERIC(15, 2), 
 	url_documento VARCHAR(255), 
-	cod_documento VARCHAR(30), 
+	cod_documento VARCHAR(40), 
 	PRIMARY KEY (id), 
 	CONSTRAINT uq_despesa_parl UNIQUE (politico_id, cod_documento, valor), 
 	FOREIGN KEY(politico_id) REFERENCES politico (id)

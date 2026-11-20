@@ -156,7 +156,7 @@ def test_ceaps_codigo_longo_e_linha_repetida_viram_uma_linha(app):
         rodar(baixar_texto=lambda url: csv_txt if url.endswith("2026.csv") else "")
         rodar(baixar_texto=lambda url: csv_txt if url.endswith("2026.csv") else "")
         ds = DespesaParlamentar.query.filter_by(valor=Decimal("186.00")).all()
-        assert len(ds) == 1 and ds[0].cod_documento == longo[:30]
+        assert len(ds) == 1 and ds[0].cod_documento == longo
 
 
 def test_downloader_padrao_pede_csv_e_nao_json():
@@ -188,3 +188,13 @@ def test_ceaps_cabecalho_entre_aspas_como_no_arquivo_real(app):
     with app.app_context():
         rodar(baixar_texto=lambda url: csv_txt if url.endswith("2026.csv") else "")
         assert DespesaParlamentar.query.filter_by(cod_documento="77").count() == 1
+
+
+def test_ceaps_codigo_vazio_com_documento_diferente_fica_separado(app):
+    cab = "ANO;MES;SENADOR;TIPO_DESPESA;CNPJ_CPF;FORNECEDOR;DOCUMENTO;DATA;DETALHAMENTO;VALOR_REEMBOLSADO;COD_DOCUMENTO"
+    linhas = [f"2026;3;Beltrano Sousa;Passagem;;LATAM;{n};01/03/2026;;50,00;" for n in ("N1", "N2")]
+    csv_txt = "x;y\n" + cab + "\n" + "\n".join(linhas) + "\n"
+    with app.app_context():
+        for _ in range(2):
+            rodar(baixar_texto=lambda url: csv_txt if url.endswith("2026.csv") else "")
+        assert DespesaParlamentar.query.filter_by(valor=Decimal("50.00")).count() == 2

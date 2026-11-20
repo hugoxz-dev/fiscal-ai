@@ -12,7 +12,7 @@ import requests
 from ...extensions import db
 from ...models import DespesaParlamentar, Politico, Proposicao
 from ..http import criar_sessao, get_json
-from ..texto import cpf_valido, dinheiro_br, digitos
+from ..texto import codigo_despesa, cpf_valido, dinheiro_br, digitos
 
 BASE = "https://dadosabertos.camara.leg.br/api/v2"
 PAUSA_PADRAO = 0.2
@@ -72,14 +72,19 @@ def _upsert_politico(get: Callable, id_camara: int, pausa: float) -> Politico | 
     return p
 
 
-def _gravar_despesas(get: Callable, p: Politico, de: date, ate: date, pausa: float) -> None:
-    vistos: set = set()  # a API repete documento/valor; a coluna cod_documento guarda só 30 caracteres
+def _gravar_despesas(get: Callable, p: Politico, de: date, ate: date, pausa: float) -> int:
+    """Grava a cota; devolve quantos itens repetidos (mesmo código e valor) foram ignorados."""
+    vistos: set = set()
+    repetidos = 0
     for ano in range(de.year, ate.year + 1):
         for it in _paginas(get, f"{BASE}/deputados/{p.id_camara}/despesas",
                            {"ano": ano, "itens": 100}, pausa):
-            cod = str(it.get("codDocumento") or "")[:30]
+            documento = digitos(it.get("cnpjCpfFornecedor"))
+            cod = codigo_despesa(it.get("codDocumento"), it.get("ano"), it.get("mes"),
+                                 documento, it.get("numDocumento"))
             valor = dinheiro_br(it.get("valorLiquido"))
             if (cod, valor) in vistos:
+                repetidos += 1
                 continue
             vistos.add((cod, valor))
             d = DespesaParlamentar.query.filter_by(politico_id=p.id, cod_documento=cod, valor=valor).first()
@@ -88,9 +93,10 @@ def _gravar_despesas(get: Callable, p: Politico, de: date, ate: date, pausa: flo
             d.mes = it.get("mes")
             d.tipo = it.get("tipoDespesa")
             d.fornecedor_nome = it.get("nomeFornecedor")
-            d.documento = digitos(it.get("cnpjCpfFornecedor"))
+            d.documento = documento
             d.url_documento = it.get("urlDocumento")
             db.session.add(d)
+    return repetidos
 
 
 def _gravar_proposicoes(get: Callable, p: Politico, de: date, pausa: float) -> None:
@@ -112,15 +118,17 @@ def coletar_camara(de: date, ate: date, get: Callable | None = None, pausa: floa
     """Deputados do MA com cota e projetos. Retorna nº de deputados."""
     get = get or partial(get_json, criar_sessao(), timeout=60)
     falhas: list = []
+    repetidos = 0
     lista = _paginas(get, f"{BASE}/deputados", {"siglaUf": "MA", "itens": 100}, pausa, falhas)
     ids = [x["id"] for x in lista]
     for id_camara in ids:
         p = _upsert_politico(get, id_camara, pausa)
         if p is None:
             continue
-        _gravar_despesas(get, p, de, ate, pausa)
+        repetidos += _gravar_despesas(get, p, de, ate, pausa)
         _gravar_proposicoes(get, p, de, pausa)
         db.session.commit()
+    click.echo(f"  itens de cota repetidos ignorados: {repetidos}")
     if ids and not falhas:  # lista incompleta ou vazia não prova que alguém saiu
         for p in Politico.query.filter(Politico.id_camara.isnot(None)).all():
             if p.id_camara not in ids:

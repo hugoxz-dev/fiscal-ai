@@ -15,7 +15,7 @@ import requests
 from ...extensions import db
 from ...models import DespesaParlamentar, Politico, Proposicao
 from ..http import criar_sessao, get_json
-from ..texto import dinheiro_br, digitos, normalizar
+from ..texto import codigo_despesa, dinheiro_br, digitos, normalizar
 
 BASE = "https://legis.senado.leg.br/dadosabertos"
 URL_LISTA = f"{BASE}/senador/lista/atual.json"
@@ -121,9 +121,10 @@ def _data_br(v: str | None) -> date | None:
         return None
 
 
-def _gravar_ceaps(baixar_texto: Callable[[str], str], politicos: list[Politico], de: date, ate: date) -> None:
+def _gravar_ceaps(baixar_texto: Callable[[str], str], politicos: list[Politico], de: date, ate: date) -> int:
     por_nome = {normalizar(p.nome_urna): p for p in politicos if p.nome_urna}
-    vistos: set = set()  # linhas repetidas; cod_documento guarda só 30 caracteres
+    vistos: set = set()
+    repetidos = 0
     for ano in range(de.year, ate.year + 1):
         url = URL_CEAPS.format(ano=ano)
         try:
@@ -135,9 +136,12 @@ def _gravar_ceaps(baixar_texto: Callable[[str], str], politicos: list[Politico],
             p = por_nome.get(normalizar(row.get("SENADOR")))
             if p is None:
                 continue
-            cod = str(row.get("COD_DOCUMENTO") or "").strip()[:30]
+            documento = digitos(row.get("CNPJ_CPF"))
+            cod = codigo_despesa(row.get("COD_DOCUMENTO"), _int(row.get("ANO")), _int(row.get("MES")),
+                                 documento, row.get("DOCUMENTO"))
             valor = dinheiro_br(row.get("VALOR_REEMBOLSADO"))
             if (p.id, cod, valor) in vistos:
+                repetidos += 1
                 continue
             vistos.add((p.id, cod, valor))
             d = DespesaParlamentar.query.filter_by(politico_id=p.id, cod_documento=cod, valor=valor).first()
@@ -146,10 +150,11 @@ def _gravar_ceaps(baixar_texto: Callable[[str], str], politicos: list[Politico],
             d.mes = _int(row.get("MES"))
             d.tipo = row.get("TIPO_DESPESA")
             d.fornecedor_nome = row.get("FORNECEDOR")
-            d.documento = digitos(row.get("CNPJ_CPF"))
+            d.documento = documento
             d.url_documento = None
             db.session.add(d)
     db.session.commit()
+    return repetidos
 
 
 def coletar_senado(de: date, ate: date, get: Callable | None = None,
@@ -168,7 +173,8 @@ def coletar_senado(de: date, ate: date, get: Callable | None = None,
         db.session.commit()
         politicos.append(p)
     if politicos:
-        _gravar_ceaps(baixar_texto, politicos, de, ate)
+        repetidos = _gravar_ceaps(baixar_texto, politicos, de, ate)
+        click.echo(f"  linhas de CEAPS repetidas ignoradas: {repetidos}")
     if politicos and not falhas:  # lista incompleta ou vazia não prova que alguém saiu
         ids = {p.id_senado for p in politicos}
         for p in Politico.query.filter(Politico.id_senado.isnot(None)).all():

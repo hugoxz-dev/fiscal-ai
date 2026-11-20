@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import re
 import unicodedata
+import hashlib
 from decimal import Decimal, InvalidOperation
 
 
@@ -45,3 +46,12 @@ def dinheiro_br(s) -> Decimal | None:
         return Decimal(t.replace(".", "").replace(",", "."))
     except InvalidOperation:
         return None
+
+
+def codigo_despesa(cod, ano, mes, documento, numero) -> str:
+    """Código do documento; se vier vazio, um código sintético estável (máx. 40 caracteres)."""
+    cod = str(cod or "").strip()
+    if cod and cod != "0":
+        return cod[:40]
+    bruto = f"s:{ano or 0}{int(mes or 0):02d}:{documento or ''}:{str(numero or '').strip()}"
+    return bruto if len(bruto) <= 40 else "s:" + hashlib.sha1(bruto.encode("utf-8")).hexdigest()[:38]

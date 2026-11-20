@@ -111,7 +111,7 @@ def test_detalhe_vazio_ou_com_erro_pula_deputado(app):
 
 
 def test_item_repetido_e_codigo_longo_viram_uma_linha(app):
-    longo = "980239B8-F7B1-4971-BB6C-A49FACCED137"  # 36 chars; a coluna guarda 30
+    longo = "980239B8-F7B1-4971-BB6C-A49FACCED137"  # 36 chars; a coluna guarda 40
     item = {"ano": 2026, "mes": 3, "tipoDespesa": "PASSAGEM", "codDocumento": longo,
             "nomeFornecedor": "LATAM", "cnpjCpfFornecedor": None, "valorLiquido": 186.0, "urlDocumento": None}
     pagina = {"dados": [item, dict(item)], "links": []}
@@ -126,4 +126,24 @@ def test_item_repetido_e_codigo_longo_viram_uma_linha(app):
         coletar_camara(date(2026, 1, 1), date(2026, 12, 31), get=get, pausa=0)
         coletar_camara(date(2026, 1, 1), date(2026, 12, 31), get=get, pausa=0)
         ds = DespesaParlamentar.query.filter_by(valor=Decimal("186.00")).all()
-        assert len(ds) == 1 and ds[0].cod_documento == longo[:30]
+        assert len(ds) == 1 and ds[0].cod_documento == longo
+
+
+def test_codigo_vazio_com_numero_diferente_fica_separado(app):
+    def it(num):
+        return {"ano": 2026, "mes": 3, "tipoDespesa": "X", "codDocumento": 0, "numDocumento": num,
+                "nomeFornecedor": "F", "cnpjCpfFornecedor": "12.345.678/0001-99", "valorLiquido": 50.0,
+                "urlDocumento": None}
+
+    base = fazer_get()
+
+    def get(url, params=None):
+        if url.endswith("/101/despesas") and (params or {}).get("ano") == 2026 and params.get("pagina", 1) == 1:
+            return {"dados": [it("A1"), it("A2")], "links": []}
+        return base(url, params)
+
+    with app.app_context():
+        for _ in range(2):
+            coletar_camara(date(2026, 1, 1), date(2026, 12, 31), get=get, pausa=0)
+        ds = DespesaParlamentar.query.filter_by(valor=Decimal("50.00")).all()
+        assert len(ds) == 2 and all(d.cod_documento.startswith("s:202603:") for d in ds)

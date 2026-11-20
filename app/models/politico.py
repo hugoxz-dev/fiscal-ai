@@ -105,6 +105,6 @@ class DespesaParlamentar(db.Model):
     documento = db.Column(db.String(14), index=True)
     valor = db.Column(Dinheiro)
     url_documento = db.Column(db.String(255))
-    cod_documento = db.Column(db.String(30))
+    cod_documento = db.Column(db.String(40))
 
     politico = db.relationship("Politico", back_populates="despesas")

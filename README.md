@@ -96,6 +96,8 @@ Limitações:
 - O TSE de 2024 não divulga o CPF dos candidatos; por isso há ligações marcadas apenas como "nome igual".
 - Suplentes de vereador ficam fora da busca.
 - Senadores são ligados aos dados do TSE pelo nome.
+- A cota dos senadores (CEAPS) é associada ao senador pelo nome normalizado que consta no arquivo do Senado.
+- A coleta de emendas exige a chave do Portal da Transparência na variável de ambiente `TRANSPARENCIA_API_KEY`.
 - Doações contam só da eleição do mandato atual (2024 municipais, 2022 deputados, 2022 ou 2018 senadores).
 - Emendas marcadas apenas como "Maranhão (UF)" não são atribuídas a São Luís.
 - O CPF nunca aparece nas páginas.
