@@ -297,3 +297,13 @@ table.lista a:hover { text-decoration: underline; }
   .cabecalho-pagina h1 { padding-right: 115px; }
   .enfeite { width: 110px; top: -.75rem; right: -.5rem; }
 }
+
+/* Políticos: busca com sugestões e lista */
+.sugestoes-wrap { position: relative; }
+.sugestoes { position: absolute; z-index: 20; left: 0; right: 0; top: 100%; margin: .15rem 0 0; padding: .25rem 0; list-style: none;
+  background: var(--branco); border: 1px solid var(--linha); border-radius: 10px; box-shadow: 0 6px 18px rgba(14, 53, 157, .15); }
+.sugestoes li a { display: block; padding: .45rem .8rem; text-decoration: none; color: var(--tinta); }
+.sugestoes li[aria-selected="true"], .sugestoes li:hover { background: #E8EEFC; }
+.busca-politico .sugestoes-wrap { min-width: min(24rem, 80vw); }
+.lista-politicos { list-style: none; padding: 0; }
+.lista-politicos li { padding: .3rem 0; display: flex; gap: .6rem; align-items: center; flex-wrap: wrap; }

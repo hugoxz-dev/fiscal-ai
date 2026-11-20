@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block titulo %}Políticos{% endblock %}
+{% block conteudo %}
+<header class="cabecalho-pagina">
+  {% include "_enfeite.html" %}
+  <h1 class="display">Políticos</h1>
+  <p class="lead">Prefeito, senadores, deputados federais e vereadores ligados a São Luís. Busque por nome, partido ou cargo.</p>
+</header>
+
+<form class="filtros busca-politico" method="get" action="{{ url_for('politicos.lista') }}" role="search">
+  <div>
+    <label for="busca-politico">Buscar político</label>
+    <div class="sugestoes-wrap">
+      <input id="busca-politico" class="form-control" name="q" value="{{ q }}" autocomplete="off"
+             role="combobox" aria-expanded="false" aria-controls="sugestoes" aria-autocomplete="list"
+             data-url="{{ url_for('politicos.busca') }}">
+      <ul id="sugestoes" class="sugestoes" role="listbox" aria-label="Sugestões" hidden></ul>
+    </div>
+  </div>
+  <div><button class="btn btn-primary" type="submit">Buscar</button></div>
+</form>
+
+{% for cargo, politicos in grupos.items() %}
+<h2>{{ cargo }}</h2>
+<ul class="lista-politicos">
+  {% for p in politicos %}
+  <li>
+    <a href="{{ url_for('politicos.detalhe', id=p.id) }}">{{ nome_exibido(p) }}</a>
+    <span class="text-secondary">{{ p.partido or '' }}</span>
+    {% if ligacoes.get(p.id) %}<span class="selo nivel-Médio" title="Ligações confirmadas com fornecedores">{{ ligacoes[p.id] }}</span>{% endif %}
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<p class="text-secondary">Nenhum político encontrado.</p>
+{% endfor %}
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='politicos.js') }}" defer></script>{% endblock %}

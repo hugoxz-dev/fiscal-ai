@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block titulo %}{{ nome_exibido }}{% endblock %}
+{% macro tabela_doadores(lista) %}
+<div class="tabela-wrap">
+  <table class="lista">
+    <thead><tr><th>Doador</th><th class="valor">Doações</th><th class="valor">Total</th></tr></thead>
+    <tbody>{% for g in lista %}
+      <tr><td>{{ g.nome }}</td><td class="valor">{{ g.qtd }}</td><td class="valor">{{ g.total | moeda }}</td></tr>
+    {% endfor %}</tbody>
+  </table>
+</div>
+{% endmacro %}
+{% block conteudo %}
+<p><a class="voltar" href="{{ url_for('politicos.lista') }}">Voltar para políticos</a></p>
+<h1>{{ nome_exibido }}</h1>
+<p class="lead">{{ p.cargo }}{% if p.partido %} ({{ p.partido }}){% endif %}
+  · {{ p.municipio or '' }}{{ '/' if p.municipio }}{{ p.uf }}{% if p.ano_eleicao %} · eleito {{ p.ano_eleicao }}{% endif %}</p>
+
+<h2>Ligações com fornecedores da prefeitura</h2>
+{% if confirmadas %}
+<ul class="ligacoes">
+  {% for l in confirmadas %}
+  {% set r = resumos[l.fornecedor.id] %}
+  <li>{{ l.descricao }}.
+    <a href="{{ url_for('fornecedores.detalhe', id=l.fornecedor.id) }}">{{ l.fornecedor.nome }}</a>:
+    {{ r.contratos }} contrato(s), {{ r.total | moeda }}{% if r.nivel %}, risco {{ r.nivel }}{% endif %}</li>
+  {% endfor %}
+</ul>
+{% else %}
+<p class="text-secondary">Nenhuma ligação confirmada com fornecedores da prefeitura.</p>
+{% endif %}
+{% if so_nome %}
+<h3>nome igual — CPF não disponível para confirmar</h3>
+<ul class="ligacoes">
+  {% for l in so_nome %}
+  {% set r = resumos[l.fornecedor.id] %}
+  <li>{{ l.descricao }}.
+    <a href="{{ url_for('fornecedores.detalhe', id=l.fornecedor.id) }}">{{ l.fornecedor.nome }}</a>:
+    {{ r.contratos }} contrato(s), {{ r.total | moeda }}</li>
+  {% endfor %}
+</ul>
+{% endif %}
+<p class="text-secondary"><small>Ligação indica relação registrada em dados públicos, não irregularidade.</small></p>
+
+{% if not p.sq_candidato %}
+<p class="text-secondary">Não encontramos prestação de contas no TSE para este mandato (por exemplo, quem assumiu como suplente).</p>
+{% endif %}
+
+<h2>Bens declarados</h2>
+{% if bens %}
+<p>Total declarado: <strong>{{ total_bens | moeda }}</strong></p>
+<div class="tabela-wrap">
+  <table class="lista">
+    <thead><tr><th>Tipo</th><th>Descrição</th><th class="valor">Valor</th></tr></thead>
+    <tbody>{% for b in bens %}
+      <tr><td>{{ b.tipo or '—' }}</td><td>{{ b.descricao or '—' }}</td><td class="valor">{{ b.valor | moeda }}</td></tr>
+    {% endfor %}</tbody>
+  </table>
+</div>
+{% else %}
+<p class="text-secondary">Nenhum bem declarado coletado.</p>
+{% endif %}
+
+<h2>Doadores de campanha</h2>
+{% if doadores %}
+<p>Total de doações diretas: <strong>{{ total_doadores | moeda }}</strong></p>
+{{ tabela_doadores(doadores) }}
+{% else %}
+<p class="text-secondary">Nenhuma doação direta coletada.</p>
+{% endif %}
+{% if originarios %}
+<h3>Doadores originários (repasses do partido)</h3>
+{{ tabela_doadores(originarios) }}
+{% endif %}
+
+{% if federal %}
+<h2>Emendas para São Luís</h2>
+{% if emendas %}
+<div class="tabela-wrap">
+  <table class="lista">
+    <thead><tr><th>Ano</th><th>Tipo</th><th>Função</th><th>Localidade</th><th class="valor">Empenhado</th><th class="valor">Pago</th></tr></thead>
+    <tbody>{% for e in emendas %}
+      <tr><td>{{ e.ano }}</td><td>{{ e.tipo or '—' }}</td><td>{{ e.funcao or '—' }}</td><td>{{ e.localidade or '—' }}</td>
+          <td class="valor">{{ e.valor_empenhado | moeda }}</td><td class="valor">{{ e.valor_pago | moeda }}</td></tr>
+    {% endfor %}</tbody>
+  </table>
+</div>
+{% else %}
+<p class="text-secondary">Nenhuma emenda para São Luís encontrada.</p>
+{% endif %}
+
+<h2>Projetos</h2>
+{% if proposicoes %}
+<ul class="ligacoes">
+  {% for x in proposicoes %}
+  <li>{% if x.url %}<a href="{{ x.url }}" rel="noopener">{{ x.sigla_tipo }} {{ x.numero }}/{{ x.ano }}</a>{% else %}{{ x.sigla_tipo }} {{ x.numero }}/{{ x.ano }}{% endif %}
+    ({{ x.data_apresentacao | data_br }}): {{ (x.ementa or '')|truncate(200) }}</li>
+  {% endfor %}
+</ul>
+{% else %}
+<p class="text-secondary">Nenhum projeto coletado.</p>
+{% endif %}
+
+<h2>Cota parlamentar</h2>
+{% if cota %}
+<p>Total gasto: <strong>{{ total_cota | moeda }}</strong></p>
+<div class="tabela-wrap">
+  <table class="lista">
+    <thead><tr><th>Tipo de despesa</th><th class="valor">Total</th></tr></thead>
+    <tbody>{% for tipo, valor in cota %}
+      <tr><td>{{ tipo }}</td><td class="valor">{{ valor | moeda }}</td></tr>
+    {% endfor %}</tbody>
+  </table>
+</div>
+{% else %}
+<p class="text-secondary">Nenhuma despesa da cota parlamentar coletada.</p>
+{% endif %}
+{% endif %}
+{% endblock %}

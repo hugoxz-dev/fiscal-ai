@@ -27,6 +27,7 @@
         {% set atual = request.endpoint or '' %}
         <a href="{{ url_for('painel.inicio') }}" class="{{ 'ativo' if atual == 'painel.inicio' }}">Início</a>
         <a href="/contratos" class="{{ 'ativo' if atual.startswith('contratos') }}">Contratos</a>
+        <a href="/politicos" class="{{ 'ativo' if atual.startswith('politicos') }}">Políticos</a>
         <a href="{{ url_for('metodologia.pagina') }}" class="{{ 'ativo' if atual.startswith('metodologia') }}">Metodologia</a>
       </nav>
     </div>

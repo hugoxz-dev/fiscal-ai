@@ -13,7 +13,7 @@ def create_app(config_override: dict | None = None) -> Flask:
     db.init_app(app)
 
     from .cli import registrar_comandos
-    from .controllers import contratos, fornecedores, metodologia, painel
+    from .controllers import contratos, fornecedores, metodologia, painel, politicos
     from .views._filtros import registrar_filtros
 
     registrar_comandos(app)
@@ -22,6 +22,7 @@ def create_app(config_override: dict | None = None) -> Flask:
     app.register_blueprint(metodologia.bp)
     app.register_blueprint(contratos.bp)
     app.register_blueprint(fornecedores.bp)
+    app.register_blueprint(politicos.bp)
 
     @app.context_processor
     def _aviso():
