@@ -12,9 +12,9 @@ import requests
 from flask import current_app
 
 from ...extensions import db
-from ...models import Convenio, Fornecedor, Orgao, Sancao
+from ...models import Convenio, Emenda, Fornecedor, Orgao, Politico, Sancao
 from ..http import criar_sessao, get_json
-from ..texto import normalizar
+from ..texto import dinheiro_br, normalizar
 
 BASE = "https://api.portaldatransparencia.gov.br/api-de-dados"
 PAUSA_PADRAO = 0.7  # limite da API: ~90 requisições por minuto
@@ -129,3 +129,39 @@ def coletar_convenios(de: date, ate: date, ibge: str, get: Callable | None = Non
         gravados += 1
     db.session.commit()
     return gravados
+
+
+def coletar_emendas(de: date, ate: date, get: Callable | None = None, pausa: float = PAUSA_PADRAO) -> int:
+    """Emendas de parlamentares federais em exercício destinadas a São Luís. Retorna nº gravadas."""
+    get = _get_padrao(get)
+    if get is None:
+        return 0
+    federais = Politico.query.filter(Politico.cargo.in_(("Deputado Federal", "Senador")),
+                                     Politico.em_exercicio.is_(True)).all()
+    gravadas = 0
+    for p in federais:
+        if not p.nome_urna:
+            continue
+        autor = normalizar(p.nome_urna)
+        for ano in range(de.year, ate.year + 1):
+            for item in _paginas(get, f"{BASE}/emendas", {"ano": ano, "nomeAutor": autor}, pausa):
+                if normalizar(item.get("nomeAutor") or "") != autor:
+                    continue
+                if not normalizar(item.get("localidadeDoGasto") or "").startswith("SAO LUIS"):
+                    continue
+                codigo = item.get("codigoEmenda")
+                if not codigo:
+                    continue
+                e = Emenda.query.filter_by(codigo=str(codigo)).first() or Emenda(codigo=str(codigo))
+                e.politico_id = p.id
+                e.ano = item.get("ano")
+                e.tipo = item.get("tipoEmenda")
+                e.localidade = item.get("localidadeDoGasto")
+                e.funcao = item.get("funcao")
+                e.subfuncao = item.get("subfuncao")
+                e.valor_empenhado = dinheiro_br(item.get("valorEmpenhado"))
+                e.valor_pago = dinheiro_br(item.get("valorPago"))
+                db.session.add(e)
+                gravadas += 1
+        db.session.commit()
+    return gravadas

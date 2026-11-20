@@ -4,9 +4,10 @@ from decimal import Decimal
 from pathlib import Path
 
 from app.extensions import db
-from app.models import Convenio, Fornecedor, Sancao
+from app.models import Convenio, Emenda, Fornecedor, Politico, Sancao
 from app.services.coletores.transparencia import (
     coletar_convenios,
+    coletar_emendas,
     coletar_sancoes,
     parse_convenio,
     parse_sancao,
@@ -15,6 +16,7 @@ from app.services.coletores.transparencia import (
 FIX = Path(__file__).parent / "fixtures"
 CEIS = json.loads((FIX / "ceis.json").read_text(encoding="utf-8"))
 CONV = json.loads((FIX / "convenios.json").read_text(encoding="utf-8"))
+EMENDAS = json.loads((FIX / "emendas.json").read_text(encoding="utf-8"))
 
 
 def test_parse_sancao():
@@ -70,3 +72,38 @@ def test_data_com_texto_vira_none():
     from app.services.coletores.transparencia import _data
     assert _data("Sem informação") is None
     assert _data("31/12/2025").isoformat() == "2025-12-31"
+
+
+def _federal():
+    db.session.add(Politico(nome="Duda", nome_urna="Duda do Maranhão", cargo="Deputado Federal",
+                            uf="MA", em_exercicio=True))
+    db.session.add(Politico(nome="Sem Urna", nome_urna=None, cargo="Senador", uf="MA", em_exercicio=True))
+    db.session.commit()
+
+
+def test_emendas_so_sao_luis_e_do_autor(app):
+    app.config["TRANSPARENCIA_API_KEY"] = "teste"
+    _federal()
+    chamadas = []
+
+    def get_falso(url, params=None):
+        chamadas.append(params)
+        return EMENDAS if params["pagina"] == 1 else []
+
+    assert coletar_emendas(date(2025, 1, 1), date(2025, 12, 31), get=get_falso, pausa=0) == 1
+    assert all(c["ano"] == 2025 and c["nomeAutor"] == "DUDA DO MARANHAO" for c in chamadas)
+    e = Emenda.query.one()
+    assert e.codigo == "202571000001" and e.ano == 2025
+    assert e.valor_empenhado == Decimal("893200.00") and e.valor_pago == Decimal("400000.50")
+
+
+def test_emendas_idempotente(app):
+    app.config["TRANSPARENCIA_API_KEY"] = "teste"
+    _federal()
+
+    def get_falso(url, params=None):
+        return EMENDAS if params["pagina"] == 1 else []
+
+    coletar_emendas(date(2025, 1, 1), date(2025, 12, 31), get=get_falso, pausa=0)
+    coletar_emendas(date(2025, 1, 1), date(2025, 12, 31), get=get_falso, pausa=0)
+    assert Emenda.query.count() == 1
