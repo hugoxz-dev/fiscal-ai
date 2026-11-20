@@ -32,6 +32,12 @@ def _coletar_cnpj(de: date, ate: date, cfg) -> int:
     return enriquecer_fornecedores()
 
 
+def _coletar_socios(de: date, ate: date, cfg) -> int:
+    from .services.coletores.brasilapi import coletar_socios
+
+    return coletar_socios()
+
+
 def _coletar_sancoes(de: date, ate: date, cfg) -> int:
     from .services.coletores.transparencia import coletar_sancoes
 
@@ -58,6 +64,7 @@ def _coletar_diario(de: date, ate: date, cfg) -> int:
 FONTES = {
     "pncp": _coletar_pncp,
     "cnpj": _coletar_cnpj,
+    "socios": _coletar_socios,
     "sancoes": _coletar_sancoes,
     "convenios": _coletar_convenios,
     "diario": _coletar_diario,
@@ -75,7 +82,7 @@ def registrar_comandos(app: Flask) -> None:
         click.echo("Tabelas criadas.")
 
     @app.cli.command("coletar")
-    @click.option("--fonte", default="todas", help="pncp | cnpj | sancoes | convenios | diario | todas")
+    @click.option("--fonte", default="todas", help="pncp | cnpj | socios | sancoes | convenios | diario | todas")
     @click.option("--de", "de", default=None, help="Data inicial AAAA-MM-DD (padrão: COLETA_INICIO)")
     @click.option("--ate", "ate", default=None, help="Data final AAAA-MM-DD (padrão: hoje)")
     def coletar(fonte, de, ate):
