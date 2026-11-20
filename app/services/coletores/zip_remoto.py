@@ -49,12 +49,16 @@ def abrir_membro(url: str, membro: str) -> TextIO:
     """Abre um arquivo de dentro do zip remoto, decodificado em latin-1. KeyError se não existir."""
     sessao = criar_sessao()
     cab = sessao.head(url, allow_redirects=True, timeout=60)
+    if cab.status_code == 404:
+        raise KeyError(f"zip inexistente: {url}")
     cab.raise_for_status()
     tamanho = int(cab.headers["Content-Length"])
 
     def baixar(inicio: int, fim: int) -> bytes:
         r = sessao.get(url, headers={"Range": f"bytes={inicio}-{fim}"}, timeout=120)
         r.raise_for_status()
+        if r.status_code != 206:
+            raise RuntimeError(f"o servidor ignorou o Range (HTTP {r.status_code}): {url}")
         return r.content
 
     zf = zipfile.ZipFile(io.BufferedReader(LeitorIntervalo(tamanho, baixar), 1 << 20))

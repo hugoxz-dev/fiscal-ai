@@ -64,3 +64,19 @@ def test_coletar_tse_idempotente(app):
     coletar_tse(abrir_falso)
     assert (Politico.query.count(), Doacao.query.count(), BemDeclarado.query.count()) == antes
     assert antes[1] == 4 and antes[2] == 3
+
+
+def test_coletar_tse_zip_ausente_segue_e_grava(app):
+    """Zip de 2018 inexistente (KeyError vindo de abrir_membro num 404) não derruba a coleta."""
+    sen = Politico(nome="Fulano Sem Registro", cargo="Senador", uf="MA", id_senado=9)
+    db.session.add(sen)
+    db.session.commit()
+
+    def abrir(url, membro):
+        if "2018" in membro:
+            raise KeyError(membro)
+        return abrir_falso(url, membro)
+
+    assert coletar_tse(abrir) == 4
+    db.session.expire_all()
+    assert Politico.query.count() == 4 and Doacao.query.count() == 4
