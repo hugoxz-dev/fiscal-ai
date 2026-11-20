@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import time
-import unicodedata
 from datetime import date, datetime
 from decimal import Decimal
 from functools import partial
@@ -15,6 +14,7 @@ from flask import current_app
 from ...extensions import db
 from ...models import Convenio, Fornecedor, Orgao, Sancao
 from ..http import criar_sessao, get_json
+from ..texto import normalizar
 
 BASE = "https://api.portaldatransparencia.gov.br/api-de-dados"
 PAUSA_PADRAO = 0.7  # limite da API: ~90 requisições por minuto
@@ -35,10 +35,6 @@ def _digitos(v: str | None) -> str:
     return "".join(c for c in (v or "") if c.isdigit())
 
 
-def _sem_acento(v: str) -> str:
-    return unicodedata.normalize("NFKD", v).encode("ascii", "ignore").decode().upper()
-
-
 def parse_sancao(item: dict, cadastro: str) -> dict:
     tipo = (item.get("tipoSancao") or {}).get("descricaoResumida") or ""
     return {
@@ -54,7 +50,7 @@ def parse_sancao(item: dict, cadastro: str) -> dict:
 def parse_convenio(item: dict, cnpjs_municipais: set[str] | None = None) -> dict:
     conv = item.get("convenente") or {}
     cnpj = _digitos(conv.get("cnpjFormatado"))
-    municipal = cnpj in (cnpjs_municipais or set()) or "MUNICIP" in _sem_acento(conv.get("nome") or "")
+    municipal = cnpj in (cnpjs_municipais or set()) or "MUNICIP" in normalizar(conv.get("nome") or "")
     dim = item.get("dimConvenio") or {}
     valor = item.get("valor")
     return {

@@ -18,3 +18,4 @@ class Fornecedor(db.Model):
     enriquecido_em = db.Column(db.DateTime)
 
     contratos = db.relationship("Contrato", back_populates="fornecedor")
+    socios = db.relationship("Socio", back_populates="fornecedor", cascade="all, delete-orphan")
