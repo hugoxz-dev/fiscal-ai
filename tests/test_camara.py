@@ -76,3 +76,35 @@ def test_quem_saiu_fica_fora_de_exercicio(app):
         coletar_camara(date(2026, 1, 1), date(2026, 12, 31), get=fazer_get(so_um), pausa=0)
         assert Politico.query.filter_by(id_camara=102).one().em_exercicio is False
         assert Politico.query.filter_by(id_camara=101).one().em_exercicio is True
+
+
+def test_lista_com_falha_nao_desativa_ninguem(app):
+    import requests
+
+    with app.app_context():
+        coletar_camara(date(2026, 1, 1), date(2026, 12, 31), get=fazer_get(), pausa=0)
+
+        def get_falho(url, params=None):
+            raise requests.ConnectionError("fora do ar")
+
+        assert coletar_camara(date(2026, 1, 1), date(2026, 12, 31), get=get_falho, pausa=0) == 0
+        assert all(p.em_exercicio for p in Politico.query.all())
+
+
+def test_detalhe_vazio_ou_com_erro_pula_deputado(app):
+    import requests
+
+    with app.app_context():
+        coletar_camara(date(2026, 1, 1), date(2026, 12, 31), get=fazer_get(), pausa=0)
+        base = fazer_get()
+
+        def get(url, params=None):
+            if url.endswith("/deputados/101"):
+                return None
+            if url.endswith("/deputados/102"):
+                raise requests.ConnectionError("x")
+            return base(url, params)
+
+        coletar_camara(date(2026, 1, 1), date(2026, 12, 31), get=get, pausa=0)
+        p = Politico.query.filter_by(id_camara=101).one()
+        assert p.nome == "FULANO DE TAL SILVA" and p.cpf == "12345678909"

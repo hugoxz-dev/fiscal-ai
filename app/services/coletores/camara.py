@@ -25,13 +25,15 @@ def _data(v: str | None) -> date | None:
         return None
 
 
-def _paginas(get: Callable, url: str, params: dict, pausa: float):
+def _paginas(get: Callable, url: str, params: dict, pausa: float, falhas: list | None = None):
     pagina = 1
     while True:
         try:
             resp = get(url, params={**params, "pagina": pagina})
         except requests.RequestException as exc:
             click.echo(f"  erro em {url} página {pagina}: {exc}")
+            if falhas is not None:
+                falhas.append(exc)
             return
         if pausa:
             time.sleep(pausa)
@@ -42,11 +44,17 @@ def _paginas(get: Callable, url: str, params: dict, pausa: float):
         pagina += 1
 
 
-def _upsert_politico(get: Callable, id_camara: int, pausa: float) -> Politico:
-    resp = get(f"{BASE}/deputados/{id_camara}") or {}
+def _upsert_politico(get: Callable, id_camara: int, pausa: float) -> Politico | None:
+    try:
+        resp = get(f"{BASE}/deputados/{id_camara}") or {}
+    except requests.RequestException as exc:
+        click.echo(f"  erro em /deputados/{id_camara}: {exc}")
+        return None
     if pausa:
         time.sleep(pausa)
-    d = resp.get("dados") or {}
+    d = resp.get("dados")
+    if not d:
+        return None
     status = d.get("ultimoStatus") or {}
     p = Politico.query.filter_by(id_camara=id_camara).first() or Politico(id_camara=id_camara)
     p.cargo = "Deputado Federal"
@@ -99,15 +107,19 @@ def _gravar_proposicoes(get: Callable, p: Politico, de: date, pausa: float) -> N
 def coletar_camara(de: date, ate: date, get: Callable | None = None, pausa: float = PAUSA_PADRAO) -> int:
     """Deputados do MA com cota e projetos. Retorna nº de deputados."""
     get = get or partial(get_json, criar_sessao(), timeout=60)
-    lista = _paginas(get, f"{BASE}/deputados", {"siglaUf": "MA", "itens": 100}, pausa)
+    falhas: list = []
+    lista = _paginas(get, f"{BASE}/deputados", {"siglaUf": "MA", "itens": 100}, pausa, falhas)
     ids = [x["id"] for x in lista]
     for id_camara in ids:
         p = _upsert_politico(get, id_camara, pausa)
+        if p is None:
+            continue
         _gravar_despesas(get, p, de, ate, pausa)
         _gravar_proposicoes(get, p, de, pausa)
         db.session.commit()
-    for p in Politico.query.filter(Politico.id_camara.isnot(None)).all():
-        if p.id_camara not in ids:
-            p.em_exercicio = False
-    db.session.commit()
+    if ids and not falhas:  # lista incompleta ou vazia não prova que alguém saiu
+        for p in Politico.query.filter(Politico.id_camara.isnot(None)).all():
+            if p.id_camara not in ids:
+                p.em_exercicio = False
+        db.session.commit()
     return len(ids)
