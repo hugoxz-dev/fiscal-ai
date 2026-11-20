@@ -144,3 +144,37 @@ def test_erro_em_processo_ou_ceaps_nao_derruba(app):
 
         assert rodar(get=get, baixar_texto=baixar_ruim) == 2
         assert Proposicao.query.count() == 0 and DespesaParlamentar.query.count() == 0
+
+
+def test_ceaps_codigo_longo_e_linha_repetida_viram_uma_linha(app):
+    longo = "980239B8-F7B1-4971-BB6C-A49FACCED137"
+    cab = "ANO;MES;SENADOR;TIPO_DESPESA;CNPJ_CPF;FORNECEDOR;DOCUMENTO;DATA;DETALHAMENTO;VALOR_REEMBOLSADO;COD_DOCUMENTO"
+    lin = f"2026;3;Beltrano Sousa;Passagem;;LATAM;X;01/03/2026;;186,00;{longo}"
+    csv_txt = f'"ULTIMA ATUALIZACAO";"x"\n{cab}\n{lin}\n{lin}\n'
+
+    with app.app_context():
+        rodar(baixar_texto=lambda url: csv_txt if url.endswith("2026.csv") else "")
+        rodar(baixar_texto=lambda url: csv_txt if url.endswith("2026.csv") else "")
+        ds = DespesaParlamentar.query.filter_by(valor=Decimal("186.00")).all()
+        assert len(ds) == 1 and ds[0].cod_documento == longo[:30]
+
+
+def test_downloader_padrao_pede_csv_e_nao_json():
+    from app.services.coletores import senado
+
+    class Resp:
+        status_code = 200
+        content = b"ok"
+
+        def raise_for_status(self):
+            pass
+
+    visto = {}
+
+    class Sessao:
+        def get(self, url, **kw):
+            visto.update(kw)
+            return Resp()
+
+    assert senado._baixar_texto(Sessao(), "https://x/y.csv") == "ok"
+    assert "json" not in visto["headers"]["Accept"]

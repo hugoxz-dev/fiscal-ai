@@ -108,3 +108,22 @@ def test_detalhe_vazio_ou_com_erro_pula_deputado(app):
         coletar_camara(date(2026, 1, 1), date(2026, 12, 31), get=get, pausa=0)
         p = Politico.query.filter_by(id_camara=101).one()
         assert p.nome == "FULANO DE TAL SILVA" and p.cpf == "12345678909"
+
+
+def test_item_repetido_e_codigo_longo_viram_uma_linha(app):
+    longo = "980239B8-F7B1-4971-BB6C-A49FACCED137"  # 36 chars; a coluna guarda 30
+    item = {"ano": 2026, "mes": 3, "tipoDespesa": "PASSAGEM", "codDocumento": longo,
+            "nomeFornecedor": "LATAM", "cnpjCpfFornecedor": None, "valorLiquido": 186.0, "urlDocumento": None}
+    pagina = {"dados": [item, dict(item)], "links": []}
+    base = fazer_get()
+
+    def get(url, params=None):
+        if url.endswith("/101/despesas") and (params or {}).get("ano") == 2026 and params.get("pagina", 1) == 1:
+            return pagina
+        return base(url, params)
+
+    with app.app_context():
+        coletar_camara(date(2026, 1, 1), date(2026, 12, 31), get=get, pausa=0)
+        coletar_camara(date(2026, 1, 1), date(2026, 12, 31), get=get, pausa=0)
+        ds = DespesaParlamentar.query.filter_by(valor=Decimal("186.00")).all()
+        assert len(ds) == 1 and ds[0].cod_documento == longo[:30]

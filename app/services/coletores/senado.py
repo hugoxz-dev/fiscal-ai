@@ -27,7 +27,7 @@ PAUSA_PADRAO = 0.2
 
 
 def _baixar_texto(sessao: requests.Session, url: str) -> str:
-    resp = sessao.get(url, timeout=120)
+    resp = sessao.get(url, timeout=120, headers={"Accept": "text/csv,*/*"})
     if resp.status_code == 404:
         return ""
     resp.raise_for_status()
@@ -123,6 +123,7 @@ def _data_br(v: str | None) -> date | None:
 
 def _gravar_ceaps(baixar_texto: Callable[[str], str], politicos: list[Politico], de: date, ate: date) -> None:
     por_nome = {normalizar(p.nome_urna): p for p in politicos if p.nome_urna}
+    vistos: set = set()  # linhas repetidas; cod_documento guarda só 30 caracteres
     for ano in range(de.year, ate.year + 1):
         url = URL_CEAPS.format(ano=ano)
         try:
@@ -134,8 +135,11 @@ def _gravar_ceaps(baixar_texto: Callable[[str], str], politicos: list[Politico],
             p = por_nome.get(normalizar(row.get("SENADOR")))
             if p is None:
                 continue
-            cod = str(row.get("COD_DOCUMENTO") or "").strip()
+            cod = str(row.get("COD_DOCUMENTO") or "").strip()[:30]
             valor = dinheiro_br(row.get("VALOR_REEMBOLSADO"))
+            if (p.id, cod, valor) in vistos:
+                continue
+            vistos.add((p.id, cod, valor))
             d = DespesaParlamentar.query.filter_by(politico_id=p.id, cod_documento=cod, valor=valor).first()
             d = d or DespesaParlamentar(politico_id=p.id, cod_documento=cod, valor=valor)
             d.ano = _int(row.get("ANO"))

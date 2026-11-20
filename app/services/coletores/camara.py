@@ -73,11 +73,15 @@ def _upsert_politico(get: Callable, id_camara: int, pausa: float) -> Politico | 
 
 
 def _gravar_despesas(get: Callable, p: Politico, de: date, ate: date, pausa: float) -> None:
+    vistos: set = set()  # a API repete documento/valor; a coluna cod_documento guarda só 30 caracteres
     for ano in range(de.year, ate.year + 1):
         for it in _paginas(get, f"{BASE}/deputados/{p.id_camara}/despesas",
                            {"ano": ano, "itens": 100}, pausa):
-            cod = str(it.get("codDocumento") or "")
+            cod = str(it.get("codDocumento") or "")[:30]
             valor = dinheiro_br(it.get("valorLiquido"))
+            if (cod, valor) in vistos:
+                continue
+            vistos.add((cod, valor))
             d = DespesaParlamentar.query.filter_by(politico_id=p.id, cod_documento=cod, valor=valor).first()
             d = d or DespesaParlamentar(politico_id=p.id, cod_documento=cod, valor=valor)
             d.ano = it.get("ano")
