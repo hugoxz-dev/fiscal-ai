@@ -157,3 +157,13 @@ def test_descricao_sem_cpf(app):
     for l in ligs:
         for cpf in (CPF_A, CPF_B, cpf_meio(CPF_A), cpf_meio(CPF_B)):
             assert cpf not in l.descricao and cpf not in l.pessoa
+
+
+def test_politico_com_cpf_e_socio_sem_cpf_vira_so_nome(app):
+    f = _forn()
+    _socio(f, "Beltrano da Silva", None)
+    p = _pol(cpf=CPF_A)
+    ligs = ligacoes_do_politico(p)
+    assert len(ligs) == 1
+    assert ligs[0].tipo == "politico_socio" and ligs[0].confirmada is False
+    assert contar_ligacoes() == {}

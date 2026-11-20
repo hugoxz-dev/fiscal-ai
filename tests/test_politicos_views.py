@@ -77,3 +77,16 @@ def test_lista_agrupada_e_menu(client, app):
 
 def test_ficha_404(client, app):
     assert client.get("/politicos/999").status_code == 404
+
+
+def test_lista_selo_de_ligacao_neutro(client, app):
+    f = Fornecedor(documento="12345678000199", nome="CONSTRUTORA ABC LTDA", tipo="PJ")
+    db.session.add(f)
+    db.session.commit()
+    db.session.add(Socio(fornecedor=f, nome="Beltrano da Silva", nome_norm=normalizar("Beltrano da Silva"),
+                         cpf_meio=cpf_meio(CPF_POL)))
+    _pol(cpf=CPF_POL)
+    html = client.get("/politicos").get_data(as_text=True)
+    item = html[html.index("<li>"):html.index("</li>")]
+    assert "nivel-" not in item
+    assert "1 ligação" in item

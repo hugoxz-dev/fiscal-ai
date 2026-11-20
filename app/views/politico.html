@@ -23,7 +23,7 @@
   {% set r = resumos[l.fornecedor.id] %}
   <li>{{ l.descricao }}.
     <a href="{{ url_for('fornecedores.detalhe', id=l.fornecedor.id) }}">{{ l.fornecedor.nome }}</a>:
-    {{ r.contratos }} contrato(s), {{ r.total | moeda }}{% if r.nivel %}, risco {{ r.nivel }}{% endif %}</li>
+    {{ r.contratos }} contrato(s), {{ r.total | moeda }}{% if r.nivel %}, maior alerta do fornecedor: {{ r.nivel }}{% endif %}</li>
   {% endfor %}
 </ul>
 {% else %}

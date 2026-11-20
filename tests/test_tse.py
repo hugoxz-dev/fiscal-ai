@@ -80,3 +80,27 @@ def test_coletar_tse_zip_ausente_segue_e_grava(app):
     assert coletar_tse(abrir) == 4
     db.session.expire_all()
     assert Politico.query.count() == 4 and Doacao.query.count() == 4
+
+
+def _abrir_com_2018(url, membro):
+    if membro == "consulta_cand_2018_MA.csv":
+        return io.StringIO(
+            '"ANO_ELEICAO";"NM_UE";"DS_CARGO";"SQ_CANDIDATO";"NM_CANDIDATO";"NR_CPF_CANDIDATO";'
+            '"SG_PARTIDO";"DS_SIT_TOT_TURNO"\n'
+            '"2018";"MARANHÃO";"DEPUTADO FEDERAL";"1801";"DEP ANTIGO";"12345678901";"PL";"ELEITO"\n'
+            '"2018";"MARANHÃO";"SENADOR";"1802";"SEN ANTIGO";"22222222222";"PL";"ELEITO"\n')
+    if membro == "consulta_cand_2022_MA.csv":
+        return io.StringIO('"DS_CARGO";"SQ_CANDIDATO"\n')
+    return abrir_falso(url, membro)
+
+
+def test_deputado_nao_usa_2018_mas_senador_sim(app):
+    dep = Politico(nome="Dep Antigo", cargo="Deputado Federal", uf="MA", id_camara=1, cpf="12345678901")
+    sen = Politico(nome="Sen Antigo", cargo="Senador", uf="MA", id_senado=2, cpf="22222222222")
+    db.session.add_all([dep, sen])
+    db.session.commit()
+    coletar_tse(_abrir_com_2018)
+    db.session.refresh(dep)
+    db.session.refresh(sen)
+    assert dep.sq_candidato is None
+    assert (sen.sq_candidato, sen.ano_eleicao) == ("1802", 2018)

@@ -9,6 +9,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 from decimal import Decimal
 
+from ..extensions import db
 from ..models import Contrato, DespesaParlamentar, Doacao, Fornecedor, Politico, Socio
 from ..views._filtros import moeda
 from .texto import cpf_meio, cpf_valido, normalizar
@@ -45,7 +46,8 @@ def _calcular(politico: Politico | None = None, fornecedor: Fornecedor | None = 
 
     q_socio = Socio.query
     q_forn = Fornecedor.query.filter_by(tipo="PF")
-    q_desp = DespesaParlamentar.query
+    q_desp = DespesaParlamentar.query.filter(
+        DespesaParlamentar.documento.in_(db.session.query(Fornecedor.documento)))
     if fornecedor:
         q_socio = q_socio.filter_by(fornecedor_id=fornecedor.id)
         q_forn = q_forn.filter_by(id=fornecedor.id)
@@ -86,14 +88,16 @@ def _calcular(politico: Politico | None = None, fornecedor: Fornecedor | None = 
 
     # politico_socio
     for p in politicos:
+        nome = normalizar(p.nome)
         if p.cpf:
-            alvo = [s for s in por_chave.get((normalizar(p.nome), cpf_meio(p.cpf)), [])]
-            confirmada = True
+            for s in por_chave.get((nome, cpf_meio(p.cpf)), []):
+                _add(Ligacao("politico_socio", True, p, s.fornecedor, s.nome, None, ""))
+            # sócio sem CPF informado (BrasilAPI omitiu): só o nome coincide
+            alvo = [s for s in por_nome.get(nome, []) if not s.cpf_meio]
         else:
-            alvo = por_nome.get(normalizar(p.nome), [])
-            confirmada = False
+            alvo = por_nome.get(nome, [])
         for s in alvo:
-            _add(Ligacao("politico_socio", confirmada, p, s.fornecedor, s.nome, None, ""))
+            _add(Ligacao("politico_socio", False, p, s.fornecedor, s.nome, None, ""))
 
     # fornecedor_pf: caminhos confirmados primeiro (doador; é o próprio político), depois só por nome
     pf = q_forn.all()

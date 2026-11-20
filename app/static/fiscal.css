@@ -307,3 +307,4 @@ table.lista a:hover { text-decoration: underline; }
 .busca-politico .sugestoes-wrap { min-width: min(24rem, 80vw); }
 .lista-politicos { list-style: none; padding: 0; }
 .lista-politicos li { padding: .3rem 0; display: flex; gap: .6rem; align-items: center; flex-wrap: wrap; }
+.selo-ligacao { display: inline-block; padding: .1rem .6rem; border-radius: 999px; background: var(--azul-claro); color: var(--azul-escuro); font-size: .85rem; font-weight: 600; }

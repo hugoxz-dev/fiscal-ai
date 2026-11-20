@@ -27,7 +27,7 @@
   <li>
     <a href="{{ url_for('politicos.detalhe', id=p.id) }}">{{ nome_exibido(p) }}</a>
     <span class="text-secondary">{{ p.partido or '' }}</span>
-    {% if ligacoes.get(p.id) %}<span class="selo nivel-Médio" title="Ligações confirmadas com fornecedores">{{ ligacoes[p.id] }}</span>{% endif %}
+    {% if ligacoes.get(p.id) %}<span class="selo-ligacao" title="Ligações confirmadas com fornecedores da prefeitura">{{ ligacoes[p.id] }} {{ 'ligação' if ligacoes[p.id] == 1 else 'ligações' }}</span>{% endif %}
   </li>
   {% endfor %}
 </ul>

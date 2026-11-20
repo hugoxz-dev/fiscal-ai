@@ -72,7 +72,8 @@ def _vincular_federais(abrir) -> None:
         db.or_(Politico.id_camara.isnot(None), Politico.id_senado.isnot(None))).all()
         if p.cargo in CARGOS_FEDERAIS]
     for ano in (2022, 2018):
-        restantes = [p for p in pendentes if not p.sq_candidato]
+        # 2018 só vale para senadores (mandato de 8 anos); deputados federais: só 2022
+        restantes = [p for p in pendentes if not p.sq_candidato and (ano == 2022 or p.cargo == "Senador")]
         if not restantes:
             break
         linhas = _linhas(abrir, "consulta_cand", "consulta_cand", ano)
