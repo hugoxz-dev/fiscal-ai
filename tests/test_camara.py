@@ -1,0 +1,78 @@
+import json
+from datetime import date
+from decimal import Decimal
+from pathlib import Path
+
+from app.extensions import db
+from app.models import DespesaParlamentar, Politico, Proposicao
+from app.services.coletores.camara import coletar_camara
+
+FIX = Path(__file__).parent / "fixtures"
+
+
+def _fix(nome):
+    return json.loads((FIX / nome).read_text(encoding="utf-8"))
+
+
+def fazer_get(lista=None):
+    lista = lista or _fix("camara_deputados.json")
+    vazio = {"dados": [], "links": []}
+
+    def get(url, params=None):
+        params = params or {}
+        if url.endswith("/deputados"):
+            return lista if params.get("pagina", 1) == 1 else vazio
+        if url.endswith("/despesas"):
+            if not url.endswith("/101/despesas") or params.get("pagina", 1) > 1:
+                return vazio
+            return _fix("camara_despesas.json") if params.get("ano") == 2026 else vazio
+        if url.endswith("/proposicoes"):
+            if params.get("idDeputadoAutor") != 101 or params.get("pagina", 1) > 1:
+                return vazio
+            return _fix("camara_proposicoes.json")
+        return _fix("camara_deputado.json")
+
+    return get
+
+
+def test_coletar_camara_cria_deputados_com_cpf(app):
+    with app.app_context():
+        n = coletar_camara(date(2026, 1, 1), date(2026, 12, 31), get=fazer_get(), pausa=0)
+        assert n == 2
+        p = Politico.query.filter_by(id_camara=101).one()
+        assert p.cpf == "12345678909" and p.nome == "FULANO DE TAL SILVA"
+        assert p.nome_urna == "Fulano de Tal" and p.partido == "PX"
+        assert p.cargo == "Deputado Federal" and p.uf == "MA" and p.em_exercicio
+        assert p.ano_eleicao == 2022 and p.foto_url.endswith("101.jpg")
+        assert "FULANO" in p.nome_busca
+
+
+def test_despesas_e_proposicoes_gravadas(app):
+    with app.app_context():
+        coletar_camara(date(2026, 1, 1), date(2026, 12, 31), get=fazer_get(), pausa=0)
+        d = DespesaParlamentar.query.filter_by(cod_documento="7771").one()
+        assert d.valor == Decimal("1500.50") and d.documento == "12345678000199"
+        assert d.ano == 2026 and d.mes == 3 and d.fornecedor_nome == "GRAFICA EXEMPLO LTDA"
+        assert DespesaParlamentar.query.filter_by(cod_documento="7772").one().documento == ""
+        pr = Proposicao.query.one()
+        assert pr.casa == "Câmara" and pr.id_externo == 2500001 and pr.sigla_tipo == "PL"
+        assert pr.data_apresentacao == date(2026, 7, 7)
+        assert pr.url == "https://www.camara.leg.br/propostas-legislativas/2500001"
+
+
+def test_idempotente(app):
+    with app.app_context():
+        for _ in range(2):
+            coletar_camara(date(2026, 1, 1), date(2026, 12, 31), get=fazer_get(), pausa=0)
+        assert Politico.query.count() == 2
+        assert DespesaParlamentar.query.count() == 2
+        assert Proposicao.query.count() == 1
+
+
+def test_quem_saiu_fica_fora_de_exercicio(app):
+    with app.app_context():
+        coletar_camara(date(2026, 1, 1), date(2026, 12, 31), get=fazer_get(), pausa=0)
+        so_um = {"dados": [{"id": 101}], "links": []}
+        coletar_camara(date(2026, 1, 1), date(2026, 12, 31), get=fazer_get(so_um), pausa=0)
+        assert Politico.query.filter_by(id_camara=102).one().em_exercicio is False
+        assert Politico.query.filter_by(id_camara=101).one().em_exercicio is True

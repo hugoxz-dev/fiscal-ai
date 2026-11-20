@@ -50,6 +50,12 @@ def _coletar_convenios(de: date, ate: date, cfg) -> int:
     return coletar_convenios(de, ate, cfg["IBGE_MUNICIPIO"])
 
 
+def _coletar_camara(de: date, ate: date, cfg) -> int:
+    from .services.coletores.camara import coletar_camara
+
+    return coletar_camara(de, ate)
+
+
 def _coletar_tse(de: date, ate: date, cfg) -> int:
     from .services.coletores.tse import coletar_tse
 
@@ -74,6 +80,7 @@ FONTES = {
     "sancoes": _coletar_sancoes,
     "convenios": _coletar_convenios,
     "diario": _coletar_diario,
+    "camara": _coletar_camara,
     "tse": _coletar_tse,
 }
 
@@ -89,7 +96,7 @@ def registrar_comandos(app: Flask) -> None:
         click.echo("Tabelas criadas.")
 
     @app.cli.command("coletar")
-    @click.option("--fonte", default="todas", help="pncp | cnpj | socios | sancoes | convenios | diario | tse | todas")
+    @click.option("--fonte", default="todas", help="pncp | cnpj | socios | sancoes | convenios | diario | camara | tse | todas")
     @click.option("--de", "de", default=None, help="Data inicial AAAA-MM-DD (padrão: COLETA_INICIO)")
     @click.option("--ate", "ate", default=None, help="Data final AAAA-MM-DD (padrão: hoje)")
     def coletar(fonte, de, ate):
