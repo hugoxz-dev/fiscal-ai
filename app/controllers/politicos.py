@@ -29,6 +29,25 @@ def _nome_exibido(p):
     return p.nome_urna or p.nome
 
 
+def _foto_src(p) -> str | None:
+    """Foto da Câmara/Senado (URL absoluta) ou do TSE baixada em static/fotos (caminho relativo)."""
+    if not p.foto_url:
+        return None
+    if p.foto_url.startswith(("http://", "https://")):
+        return p.foto_url
+    return url_for("static", filename=p.foto_url)
+
+
+def _iniciais(p) -> str:
+    partes = _nome_exibido(p).split()
+    return "".join(x[0] for x in (partes[:1] + partes[1:][-1:])).upper()
+
+
+@bp.context_processor
+def _ajudantes_de_foto():
+    return {"foto_src": _foto_src, "iniciais": _iniciais}
+
+
 @bp.route("/politicos")
 def lista():
     q = request.args.get("q", "").strip()

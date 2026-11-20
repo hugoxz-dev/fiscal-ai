@@ -47,6 +47,11 @@ class LeitorIntervalo(io.RawIOBase):
 
 def abrir_membro(url: str, membro: str) -> TextIO:
     """Abre um arquivo de dentro do zip remoto, decodificado em latin-1. KeyError se não existir."""
+    return io.TextIOWrapper(abrir_zip(url).open(membro), encoding="latin-1", newline="")
+
+
+def abrir_zip(url: str) -> zipfile.ZipFile:
+    """Zip remoto lido sob demanda (só o índice e os membros abertos são baixados). KeyError se não existir."""
     sessao = criar_sessao()
     cab = sessao.head(url, allow_redirects=True, timeout=60)
     if cab.status_code == 404:
@@ -61,5 +66,4 @@ def abrir_membro(url: str, membro: str) -> TextIO:
             raise RuntimeError(f"o servidor ignorou o Range (HTTP {r.status_code}): {url}")
         return r.content
 
-    zf = zipfile.ZipFile(io.BufferedReader(LeitorIntervalo(tamanho, baixar), 1 << 20))
-    return io.TextIOWrapper(zf.open(membro), encoding="latin-1", newline="")
+    return zipfile.ZipFile(io.BufferedReader(LeitorIntervalo(tamanho, baixar), 1 << 20))

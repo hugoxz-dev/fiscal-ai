@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_foto_politico.html" import foto_politico with context %}
 {% block titulo %}{{ nome_exibido }}{% endblock %}
 {% macro tabela_doadores(lista) %}
 <div class="tabela-wrap">
@@ -12,9 +13,14 @@
 {% endmacro %}
 {% block conteudo %}
 <p><a class="voltar" href="{{ url_for('politicos.lista') }}">Voltar para políticos</a></p>
-<h1>{{ nome_exibido }}</h1>
-<p class="lead">{{ p.cargo }}{% if p.partido %} ({{ p.partido }}){% endif %}
-  · {{ p.municipio or '' }}{{ '/' if p.municipio }}{{ p.uf }}{% if p.ano_eleicao %} · eleito {{ p.ano_eleicao }}{% endif %}</p>
+<div class="cabecalho-politico">
+  {{ foto_politico(p, "grande") }}
+  <div>
+    <h1>{{ nome_exibido }}</h1>
+    <p class="lead">{{ p.cargo }}{% if p.partido %} ({{ p.partido }}){% endif %}
+      · {{ p.municipio or '' }}{{ '/' if p.municipio }}{{ p.uf }}{% if p.ano_eleicao %} · eleito {{ p.ano_eleicao }}{% endif %}</p>
+  </div>
+</div>
 
 <h2>Ligações com fornecedores da prefeitura</h2>
 {% if confirmadas %}

@@ -90,3 +90,16 @@ def test_lista_selo_de_ligacao_neutro(client, app):
     item = html[html.index("<li>"):html.index("</li>")]
     assert "nivel-" not in item
     assert "1 ligação" in item
+
+
+def test_lista_e_ficha_mostram_foto_ou_iniciais(client, app):
+    local = _pol("Ana Local", sq="10", foto_url="fotos/10.jpg")
+    remoto = _pol("Bruno Remoto", cargo="Senador", sq="11", foto_url="http://senado/x.jpg")
+    _pol("Carla Sem Foto", sq="12")
+    html = client.get("/politicos").get_data(as_text=True)
+    assert 'src="/static/fotos/10.jpg"' in html
+    assert 'src="http://senado/x.jpg"' in html
+    assert ">CF<" in html  # iniciais de quem não tem foto
+    ficha = client.get(f"/politicos/{local.id}").get_data(as_text=True)
+    assert 'src="/static/fotos/10.jpg"' in ficha
+    assert remoto.id

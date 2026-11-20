@@ -1,0 +1,8 @@
+{% macro foto_politico(p, classe="") %}
+{%- set src = foto_src(p) -%}
+{%- if src -%}
+<img class="foto-politico {{ classe }}" src="{{ src }}" alt="" loading="lazy" referrerpolicy="no-referrer">
+{%- else -%}
+<span class="foto-politico sem-foto {{ classe }}" aria-hidden="true">{{ iniciais(p) }}</span>
+{%- endif -%}
+{% endmacro %}

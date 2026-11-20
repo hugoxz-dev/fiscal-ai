@@ -307,4 +307,9 @@ table.lista a:hover { text-decoration: underline; }
 .busca-politico .sugestoes-wrap { min-width: min(24rem, 80vw); }
 .lista-politicos { list-style: none; padding: 0; }
 .lista-politicos li { padding: .3rem 0; display: flex; gap: .6rem; align-items: center; flex-wrap: wrap; }
+.foto-politico { flex: none; width: 40px; height: 40px; border-radius: 50%; object-fit: cover; object-position: top; background: var(--azul-claro); }
+.foto-politico.sem-foto { display: inline-flex; align-items: center; justify-content: center; color: var(--azul-escuro); font-size: .8rem; font-weight: 600; }
+.foto-politico.grande { width: 96px; height: 96px; font-size: 1.6rem; }
+.cabecalho-politico { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; margin-bottom: 1rem; }
+.cabecalho-politico h1 { margin-bottom: .25rem; }
 .selo-ligacao { display: inline-block; padding: .1rem .6rem; border-radius: 999px; background: var(--azul-claro); color: var(--azul-escuro); font-size: .85rem; font-weight: 600; }
