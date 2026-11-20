@@ -29,6 +29,30 @@
 <p class="text-secondary">Nenhuma sanção encontrada no CEIS ou no CNEP.</p>
 {% endif %}
 
+{% if ligacoes_confirmadas or ligacoes_so_nome %}
+<h2>Ligações com políticos</h2>
+{% if ligacoes_confirmadas %}
+<ul class="ligacoes">
+  {% for l in ligacoes_confirmadas %}
+  <li>{{ l.descricao }}.
+    <a href="{{ url_for('politicos.detalhe', id=l.politico.id) }}">{{ l.politico.nome_urna or l.politico.nome }}</a>
+    ({{ l.politico.cargo }})</li>
+  {% endfor %}
+</ul>
+{% endif %}
+{% if ligacoes_so_nome %}
+<h3>nome igual — CPF não disponível para confirmar</h3>
+<ul class="ligacoes">
+  {% for l in ligacoes_so_nome %}
+  <li>{{ l.descricao }}.
+    <a href="{{ url_for('politicos.detalhe', id=l.politico.id) }}">{{ l.politico.nome_urna or l.politico.nome }}</a>
+    ({{ l.politico.cargo }})</li>
+  {% endfor %}
+</ul>
+{% endif %}
+<p class="text-secondary"><small>Ligação indica relação registrada em dados públicos, não irregularidade.</small></p>
+{% endif %}
+
 <h2>Participação nos contratos do órgão</h2>
 {% if concentracao %}
 <div class="tabela-wrap">

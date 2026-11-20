@@ -17,3 +17,10 @@ def test_init_db_grava_schema_mysql(app, tmp_path):
     sql = destino.read_text(encoding="utf-8")
     assert "CREATE TABLE contrato" in sql
     assert "LONGTEXT" in sql
+
+
+def test_metodologia_explica_ligacoes(client):
+    html = client.get("/metodologia").get_data(as_text=True)
+    assert "Ligações com políticos" in html
+    assert "6 dígitos do meio" in html
+    assert "não entra no score" in html

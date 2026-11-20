@@ -4,6 +4,7 @@ from flask import Blueprint, abort, render_template
 
 from ..extensions import db
 from ..models import Contrato, Fornecedor, Sancao
+from ..services.ligacoes import ligacoes_do_fornecedor
 
 bp = Blueprint("fornecedores", __name__)
 
@@ -22,7 +23,10 @@ def detalhe(id):
         if total:
             concentracao.append({"orgao": orgao.razao_social, "ano": ano, "valor": valor, "total": total,
                                  "percentual": round(float(valor / total) * 100, 1)})
-    return render_template("fornecedor.html", f=f, sancoes=sancoes, contratos=contratos, concentracao=concentracao)
+    ligacoes = ligacoes_do_fornecedor(f)
+    return render_template("fornecedor.html", f=f, sancoes=sancoes, contratos=contratos, concentracao=concentracao,
+                           ligacoes_confirmadas=[l for l in ligacoes if l.confirmada],
+                           ligacoes_so_nome=[l for l in ligacoes if not l.confirmada])
 
 
 def _somas(f):

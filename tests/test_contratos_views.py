@@ -119,3 +119,30 @@ def test_busca_por_digitos_nao_encontra_cpf(client, fazer_contrato):
     fazer_contrato(fornecedor=pf, objeto="Feijão PNAE")
     html = client.get("/contratos?fornecedor=45678901").get_data(as_text=True)
     assert "Feijão PNAE" not in html
+
+
+def test_fornecedor_mostra_ligacao_com_politico(client):
+    from app.models import Politico, Socio
+    from app.services.texto import cpf_meio, normalizar
+    f = Fornecedor(documento="12345678000199", nome="CONSTRUTORA ABC LTDA", tipo="PJ")
+    p = Politico(nome="Beltrano da Silva", nome_urna="Beltraninho", cpf=None, cargo="Vereador", uf="MA")
+    db.session.add_all([f, p])
+    db.session.commit()
+    db.session.add(Socio(fornecedor=f, nome="Beltrano da Silva", nome_norm=normalizar("Beltrano da Silva"),
+                         cpf_meio=cpf_meio(None)))
+    db.session.commit()
+    html = client.get(f"/fornecedores/{f.id}").get_data(as_text=True)
+    assert "Ligações com políticos" in html
+    assert "Ligação indica relação registrada em dados públicos, não irregularidade." in html
+    assert "nome igual — CPF não disponível para confirmar" in html
+    assert f"/politicos/{p.id}" in html
+    assert "Beltraninho" in html
+
+
+def test_fornecedor_sem_ligacao_nao_mostra_bloco(client):
+    f = Fornecedor(documento="12345678000199", nome="CONSTRUTORA ABC LTDA", tipo="PJ")
+    db.session.add(f)
+    db.session.commit()
+    html = client.get(f"/fornecedores/{f.id}").get_data(as_text=True)
+    assert "Ligações com políticos" not in html
+    assert "Ligação indica relação" not in html

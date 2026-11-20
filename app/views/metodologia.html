@@ -39,6 +39,23 @@
 <h2>Papel da inteligência artificial</h2>
 <p class="lead">Um modelo de linguagem local (Qwen 2.5, via Ollama) faz três coisas: lê os extratos do Diário Oficial e organiza os dados, avalia se a atividade da empresa combina com o objeto do contrato, e escreve em português a explicação dos indícios. A decisão de marcar um contrato é sempre das regras acima.</p>
 
+<h2>Ligações com políticos</h2>
+<p>Além das verificações acima, o Fiscal AI mostra quando um fornecedor da Prefeitura tem relação registrada em dados públicos com um político ligado a São Luís. Uma ligação é um fato registrado, não uma suspeita: ela <strong>não entra no score</strong>, não gera alerta e não indica irregularidade. Existem quatro tipos:</p>
+<ul>
+  <li>Sócio da empresa que doou para a campanha do político (dados do TSE).</li>
+  <li>O próprio político aparece como sócio da empresa fornecedora.</li>
+  <li>O fornecedor é pessoa física e é o próprio político, ou doou para a campanha dele.</li>
+  <li>O político pagou ao fornecedor com a cota parlamentar (deputados federais e senadores).</li>
+</ul>
+<p>Uma ligação só é confirmada quando o nome e os 6 dígitos do meio do CPF conferem, porque as fontes públicas mascaram o CPF. Quando só o nome coincide, a ligação aparece à parte, com o rótulo "nome igual — CPF não disponível para confirmar".</p>
+<ul>
+  <li>Suplentes de vereador ficam fora da busca.</li>
+  <li>O TSE de 2024 não divulga o CPF dos candidatos; por isso há ligações marcadas apenas como "nome igual".</li>
+  <li>Emendas marcadas apenas como "Maranhão (UF)" não são atribuídas a São Luís.</li>
+  <li>Senadores são ligados aos dados do TSE pelo nome.</li>
+  <li>Doações contam só da eleição do mandato atual.</li>
+</ul>
+
 <h2>Fontes</h2>
 <ul>
   <li>PNCP — Portal Nacional de Contratações Públicas: licitações, contratos e aditivos.</li>
