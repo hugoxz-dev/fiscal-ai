@@ -46,6 +46,28 @@ CREATE TABLE orgao (
 	UNIQUE (cnpj)
 );
 
+CREATE TABLE politico (
+	id INTEGER NOT NULL AUTO_INCREMENT, 
+	nome VARCHAR(255) NOT NULL, 
+	nome_urna VARCHAR(255), 
+	nome_busca VARCHAR(600), 
+	cpf VARCHAR(11), 
+	cargo VARCHAR(20), 
+	partido VARCHAR(30), 
+	uf VARCHAR(2), 
+	municipio VARCHAR(100), 
+	ano_eleicao INTEGER, 
+	sq_candidato VARCHAR(20), 
+	id_camara INTEGER, 
+	id_senado INTEGER, 
+	foto_url VARCHAR(255), 
+	em_exercicio BOOL, 
+	PRIMARY KEY (id), 
+	UNIQUE (sq_candidato), 
+	UNIQUE (id_camara), 
+	UNIQUE (id_senado)
+);
+
 CREATE TABLE publicacao_diario (
 	id INTEGER NOT NULL AUTO_INCREMENT, 
 	data_edicao DATE, 
@@ -69,6 +91,16 @@ CREATE TABLE sancao (
 	UNIQUE (documento, cadastro, data_inicio)
 );
 
+CREATE TABLE bem_declarado (
+	id INTEGER NOT NULL AUTO_INCREMENT, 
+	politico_id INTEGER NOT NULL, 
+	tipo VARCHAR(255), 
+	descricao TEXT, 
+	valor NUMERIC(15, 2), 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(politico_id) REFERENCES politico (id)
+);
+
 CREATE TABLE contratacao (
 	id INTEGER NOT NULL AUTO_INCREMENT, 
 	numero_controle_pncp VARCHAR(60) NOT NULL, 
@@ -87,6 +119,83 @@ CREATE TABLE contratacao (
 	PRIMARY KEY (id), 
 	UNIQUE (numero_controle_pncp), 
 	FOREIGN KEY(orgao_id) REFERENCES orgao (id)
+);
+
+CREATE TABLE despesa_parlamentar (
+	id INTEGER NOT NULL AUTO_INCREMENT, 
+	politico_id INTEGER NOT NULL, 
+	ano INTEGER, 
+	mes INTEGER, 
+	tipo VARCHAR(255), 
+	fornecedor_nome VARCHAR(255), 
+	documento VARCHAR(14), 
+	valor NUMERIC(15, 2), 
+	url_documento VARCHAR(255), 
+	cod_documento VARCHAR(30), 
+	PRIMARY KEY (id), 
+	CONSTRAINT uq_despesa_parl UNIQUE (politico_id, cod_documento, valor), 
+	FOREIGN KEY(politico_id) REFERENCES politico (id)
+);
+
+CREATE TABLE doacao (
+	id INTEGER NOT NULL AUTO_INCREMENT, 
+	politico_id INTEGER NOT NULL, 
+	sq_receita VARCHAR(30), 
+	documento VARCHAR(14), 
+	nome VARCHAR(255), 
+	nome_norm VARCHAR(255), 
+	origem VARCHAR(100), 
+	valor NUMERIC(15, 2), 
+	data DATE, 
+	originario BOOL, 
+	PRIMARY KEY (id), 
+	CONSTRAINT uq_doacao UNIQUE (politico_id, sq_receita, originario, documento), 
+	FOREIGN KEY(politico_id) REFERENCES politico (id)
+);
+
+CREATE TABLE emenda (
+	id INTEGER NOT NULL AUTO_INCREMENT, 
+	politico_id INTEGER NOT NULL, 
+	codigo VARCHAR(20), 
+	ano INTEGER, 
+	tipo VARCHAR(150), 
+	localidade VARCHAR(150), 
+	funcao VARCHAR(100), 
+	subfuncao VARCHAR(100), 
+	valor_empenhado NUMERIC(15, 2), 
+	valor_pago NUMERIC(15, 2), 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(politico_id) REFERENCES politico (id), 
+	UNIQUE (codigo)
+);
+
+CREATE TABLE proposicao (
+	id INTEGER NOT NULL AUTO_INCREMENT, 
+	politico_id INTEGER NOT NULL, 
+	casa VARCHAR(10), 
+	id_externo INTEGER, 
+	sigla_tipo VARCHAR(10), 
+	numero INTEGER, 
+	ano INTEGER, 
+	ementa TEXT, 
+	data_apresentacao DATE, 
+	url VARCHAR(255), 
+	PRIMARY KEY (id), 
+	CONSTRAINT uq_proposicao UNIQUE (politico_id, casa, id_externo), 
+	FOREIGN KEY(politico_id) REFERENCES politico (id)
+);
+
+CREATE TABLE socio (
+	id INTEGER NOT NULL AUTO_INCREMENT, 
+	fornecedor_id INTEGER NOT NULL, 
+	nome VARCHAR(255), 
+	nome_norm VARCHAR(255), 
+	cpf_meio VARCHAR(6), 
+	qualificacao VARCHAR(100), 
+	data_entrada DATE, 
+	PRIMARY KEY (id), 
+	CONSTRAINT uq_socio_fornecedor_nome UNIQUE (fornecedor_id, nome), 
+	FOREIGN KEY(fornecedor_id) REFERENCES fornecedor (id)
 );
 
 CREATE TABLE contrato (

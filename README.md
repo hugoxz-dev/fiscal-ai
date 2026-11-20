@@ -71,6 +71,35 @@ flask run                                                      # http://127.0.0.
 
 Tempos de referência: o PNCP leva cerca de 3 minutos por mês de dados, e o Diário cerca de 30 segundos por edição (download do PDF).
 
+## Políticos
+
+Busca de políticos ligados a São Luís (prefeito, vereadores, deputados federais e senadores do Maranhão) e das **ligações** entre eles e os fornecedores da Prefeitura. Ligação não é alerta: não entra no score e não indica irregularidade.
+
+Fontes: TSE (candidaturas, doações e bens declarados), Câmara dos Deputados (deputados do MA, cota parlamentar e projetos), Senado Federal (senadores do MA, CEAPS e projetos), Portal da Transparência (emendas parlamentares destinadas a São Luís) e BrasilAPI (quadro societário dos fornecedores).
+
+Ordem dos comandos (a coleta de sócios vem antes, porque as ligações usam o quadro societário):
+
+```bash
+flask init-db
+flask coletar --fonte socios                       # sócios dos fornecedores (BrasilAPI, ~0,5 s por fornecedor)
+flask coletar --fonte camara --de 2023-02-01       # deputados do MA, cota e projetos
+flask coletar --fonte senado --de 2023-02-01       # senadores do MA, CEAPS e projetos
+flask coletar --fonte tse                          # prefeito, vereadores, doações e bens
+flask coletar --fonte emendas --de 2023-01-01      # emendas para São Luís (precisa da chave)
+```
+
+Todos os comandos podem ser repetidos sem duplicar registros.
+
+Limitações:
+
+- Uma ligação só é confirmada quando o nome e os 6 dígitos do meio do CPF conferem. Quando só o nome coincide, aparece à parte como "nome igual — CPF não disponível para confirmar".
+- O TSE de 2024 não divulga o CPF dos candidatos; por isso há ligações marcadas apenas como "nome igual".
+- Suplentes de vereador ficam fora da busca.
+- Senadores são ligados aos dados do TSE pelo nome.
+- Doações contam só da eleição do mandato atual (2024 municipais, 2022 deputados, 2022 ou 2018 senadores).
+- Emendas marcadas apenas como "Maranhão (UF)" não são atribuídas a São Luís.
+- O CPF nunca aparece nas páginas.
+
 ## Validação dos alertas (capítulo de resultados)
 
 ```bash
