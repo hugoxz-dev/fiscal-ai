@@ -100,7 +100,7 @@ Emendas para São Luís / Projetos / Cota parlamentar (só federais)
 
 ## Coleta
 
-- Novas fontes no `FONTES` de `app/cli.py`: `tse`, `camara`, `senado`, `emendas`. Ordem em "todas": depois de `cnpj`, e `tse` antes de `camara`/`senado`/`emendas` (vínculos).
+- Novas fontes no `FONTES` de `app/cli.py`: `tse`, `camara`, `senado`, `emendas`. Ordem em "todas": `camara` e `senado` antes de `tse` (o TSE vincula os federais já criados), `emendas` por último.
 - O `cnpj` passa a gravar sócios. Fornecedores já enriquecidos precisam de nova passada (ex.: opção para refazer quem não tem sócios).
 - Coletas idempotentes (rodar de novo não duplica), seguindo o padrão dos coletores atuais, com testes usando fixtures JSON/CSV em `tests/fixtures/`.
 
