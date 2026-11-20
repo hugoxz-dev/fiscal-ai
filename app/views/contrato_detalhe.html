@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block titulo %}Contrato {{ c.numero_controle_pncp }}{% endblock %}
 {% block conteudo %}
-<p><a href="{{ url_for('contratos.lista') }}">Voltar para contratos</a></p>
+<p><a class="voltar" href="{{ url_for('contratos.lista') }}">Voltar para contratos</a></p>
 <div class="cabecalho-detalhe">
   <span class="selo grande nivel-{{ c.nivel }}{{ ' zero' if c.score == 0 }}" aria-label="Score {{ c.score }} de 100">{{ c.score }}</span>
   <div>

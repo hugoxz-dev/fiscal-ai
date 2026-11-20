@@ -1,8 +1,11 @@
 {% extends "base.html" %}
 {% block titulo %}Contratos{% endblock %}
 {% block conteudo %}
-<h1>Contratos</h1>
-<p class="lead">Todos os contratos coletados, do maior para o menor score. Use os filtros para encontrar um órgão, um fornecedor ou um período.</p>
+<header class="cabecalho-pagina">
+  {% include "_enfeite.html" %}
+  <h1 class="display">Contratos</h1>
+  <p class="lead">Todos os contratos coletados, do maior para o menor score. Use os filtros para encontrar um órgão, um fornecedor ou um período.</p>
+</header>
 
 <form class="filtros" method="get" action="{{ url_for('contratos.lista') }}">
   <div>
@@ -51,7 +54,7 @@
   <div><button class="btn btn-azulejo" type="submit">Filtrar</button></div>
 </form>
 
-<p class="text-secondary">{{ paginacao.total }} contrato{{ 's' if paginacao.total != 1 }} encontrado{{ 's' if paginacao.total != 1 }}.</p>
+<p class="contagem">{{ paginacao.total }} contrato{{ 's' if paginacao.total != 1 }} encontrado{{ 's' if paginacao.total != 1 }}.</p>
 
 {% if paginacao.items %}
 <div class="tabela-wrap">
@@ -72,7 +75,7 @@
   </table>
 </div>
 {% if paginacao.pages > 1 %}
-<nav class="d-flex gap-3 align-items-center mt-3" aria-label="Paginação">
+<nav class="paginacao d-flex gap-3 align-items-center mt-3" aria-label="Paginação">
   {% set args = request.args.to_dict() %}
   {% if paginacao.has_prev %}{% set _ = args.update(pagina=paginacao.prev_num) %}<a href="{{ url_for('contratos.lista', **args) }}">Página anterior</a>{% endif %}
   <span>Página {{ paginacao.page }} de {{ paginacao.pages }}</span>

@@ -1,8 +1,11 @@
 {% extends "base.html" %}
 {% block titulo %}Metodologia{% endblock %}
 {% block conteudo %}
-<h1>Como o score de risco é calculado</h1>
-<p class="lead">O Fiscal AI não decide sozinho se houve irregularidade. Ele aplica regras objetivas, com base legal, a dados públicos. Cada regra que se confirma soma os pontos indicados ao score do contrato, até o máximo de 100.</p>
+<header class="cabecalho-pagina">
+  {% include "_enfeite.html" %}
+  <h1 class="display">Como o score é calculado</h1>
+  <p class="lead">O Fiscal AI não decide sozinho se houve irregularidade. Ele aplica regras objetivas, com base legal, a dados públicos. Cada regra que se confirma soma os pontos indicados ao score do contrato, até o máximo de 100.</p>
+</header>
 
 <h2>As nove verificações</h2>
 <div>

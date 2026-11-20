@@ -1,0 +1,9 @@
+<svg class="enfeite" viewBox="0 0 330 190" aria-hidden="true" focusable="false">
+  <g fill="#0E359D">{% for i in range(4) %}{% for j in range(3) %}<circle cx="{{ 170 + i * 18 }}" cy="{{ 120 + j * 18 }}" r="3.2"/>{% endfor %}{% endfor %}</g>
+  <rect x="150" y="16" width="168" height="72" rx="22" fill="#fff" stroke="#0E359D" stroke-width="12"/>
+  <g transform="translate(86 112)">
+    {% for a in range(0, 360, 72) %}<ellipse cx="0" cy="-30" rx="21" ry="29" fill="#0E359D" transform="rotate({{ a }})"/>{% endfor %}
+    <circle r="15" fill="#fff"/>
+  </g>
+  <circle cx="300" cy="150" r="13" fill="#FF606A"/>
+</svg>

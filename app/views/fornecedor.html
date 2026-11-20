@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block titulo %}{{ f.nome }}{% endblock %}
 {% block conteudo %}
-<p><a href="{{ url_for('contratos.lista') }}">Voltar para contratos</a></p>
+<p><a class="voltar" href="{{ url_for('contratos.lista') }}">Voltar para contratos</a></p>
 <h1>{{ f.nome }}</h1>
 
 <dl class="dados">

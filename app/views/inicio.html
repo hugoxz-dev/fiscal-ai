@@ -1,22 +1,44 @@
 {% extends "base.html" %}
 {% block titulo %}Início{% endblock %}
 {% block conteudo %}
-<h1>Onde estão os indícios de risco nos contratos da Prefeitura</h1>
-<p class="lead">Cada contrato publicado no PNCP passa por nove verificações baseadas na Lei 14.133/2021. Quanto maior o score, mais indícios foram encontrados — e mais vale a pena olhar de perto.</p>
-
+{% set atencao = kpis.alto + kpis.medio %}
+<section class="palco">
+  <svg class="personagem" viewBox="0 0 240 300" aria-hidden="true" focusable="false">
+    <path d="M78 300 C46 222 52 128 108 66 C146 24 204 6 240 22 L240 900 L72 900 C74 700 80 400 78 300 Z" fill="#FF606A"/>
+    <g transform="rotate(-24 132 104)"><rect x="110" y="94" width="46" height="21" rx="10.5" fill="#fff"/><circle cx="124" cy="104.5" r="6" fill="#0A1A4A"/></g>
+    <g transform="rotate(-24 192 80)"><rect x="170" y="70" width="46" height="21" rx="10.5" fill="#fff"/><circle cx="184" cy="80.5" r="6" fill="#0A1A4A"/></g>
+    <path d="M150 150 q20 18 44 -2" fill="none" stroke="#22C3AE" stroke-width="7" stroke-linecap="round"/>
+    <path d="M112 214 C92 214 80 202 74 188" fill="none" stroke="#FF606A" stroke-width="18" stroke-linecap="round"/>
+    <line x1="70" y1="180" x2="55" y2="164" stroke="#22C3AE" stroke-width="9" stroke-linecap="round"/>
+    <circle cx="38" cy="146" r="25" fill="#fff" fill-opacity=".18" stroke="#22C3AE" stroke-width="9"/>
+    <circle cx="30" cy="138" r="5" fill="#fff"/>
+  </svg>
 {% if kpis.contratos == 0 %}
-  <div class="vazio mt-4">
-    <h2 class="mt-0">Nenhum contrato analisado ainda</h2>
-    <p class="mb-0">Rode <code>flask coletar</code> e depois <code>flask analisar</code> para preencher o painel.</p>
-  </div>
+  <h1 class="display">Nenhum contrato analisado ainda</h1>
+  <p class="lead vazio-texto mb-0">Rode <code>flask coletar</code> e depois <code>flask analisar</code> para preencher o painel.</p>
+</section>
 {% else %}
+  <h1 class="display">{{ kpis.contratos }} contratos.
+    {% if atencao %}<span class="moldura">{{ atencao }}</span> pedem um olhar de perto.{% else %}Nenhum pede atenção agora.{% endif %}</h1>
+  <p class="lead">Cada contrato da Prefeitura de São Luís publicado no PNCP passa por nove verificações baseadas na Lei 14.133/2021. Quanto maior o score, mais indícios foram encontrados.</p>
+  {% if kpis.alto %}
+  <div class="acoes">
+    <a class="botao" href="{{ url_for('contratos.lista', nivel='Alto') }}">Ver contratos de risco alto</a>
+    <a class="secundario" href="{{ url_for('metodologia.pagina') }}">Como o score é calculado</a>
+  </div>
+  {% else %}
+  <div class="acoes">
+    <a class="botao" href="{{ url_for('contratos.lista') }}">Ver todos os contratos</a>
+    <a class="secundario" href="{{ url_for('metodologia.pagina') }}">Como o score é calculado</a>
+  </div>
+  {% endif %}
   <div class="numeros">
-    <div><strong>{{ kpis.contratos }}</strong><span>contratos analisados</span></div>
     <div><strong>{{ kpis.valor | moeda }}</strong><span>valor total contratado</span></div>
     <div class="alto"><strong>{{ kpis.alto }}</strong><span>com risco alto</span></div>
     <div><strong>{{ kpis.medio }}</strong><span>com risco médio</span></div>
     <div><strong>{{ kpis.convenios | moeda if kpis.convenios else "—" }}</strong><span>em convênios federais</span></div>
   </div>
+</section>
 
   <h2>Contratos com mais indícios</h2>
   <div class="tabela-wrap">
@@ -48,12 +70,12 @@
   const dados = {{ grafico | tojson }};
   new Chart(document.getElementById("grafico-modalidade"), {
     type: "bar",
-    data: { labels: dados.rotulos, datasets: [{ data: dados.valores, backgroundColor: "#1F4E9C", borderRadius: 2 }] },
+    data: { labels: dados.rotulos, datasets: [{ data: dados.valores, backgroundColor: "#0E359D", borderRadius: 6 }] },
     options: {
       indexAxis: "y", maintainAspectRatio: false, animation: false,
       plugins: { legend: { display: false },
         tooltip: { callbacks: { label: (c) => c.raw.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) } } },
-      scales: { x: { ticks: { callback: (v) => (v / 1e6).toLocaleString("pt-BR") + " mi" }, grid: { color: "#D9E0EA" } },
+      scales: { x: { ticks: { callback: (v) => (v / 1e6).toLocaleString("pt-BR") + " mi" }, grid: { color: "#E1E6F2" } },
                 y: { grid: { display: false } } }
     }
   });
