@@ -109,7 +109,7 @@ def _gravar_proposicoes(get: Callable, p: Politico, de: date, pausa: float) -> N
 def _linhas_ceaps(texto: str):
     linhas = texto.splitlines()
     for n, linha in enumerate(linhas):  # a 1ª linha é "ULTIMA ATUALIZACAO", antes do cabeçalho
-        if linha.lstrip('"').startswith("ANO;") or linha.startswith("ANO"):
+        if linha.replace('"', "").startswith("ANO;"):
             return csv.DictReader(io.StringIO("\n".join(linhas[n:])), delimiter=";")
     return iter(())
 

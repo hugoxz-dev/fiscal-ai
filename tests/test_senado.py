@@ -178,3 +178,13 @@ def test_downloader_padrao_pede_csv_e_nao_json():
 
     assert senado._baixar_texto(Sessao(), "https://x/y.csv") == "ok"
     assert "json" not in visto["headers"]["Accept"]
+
+
+def test_ceaps_cabecalho_entre_aspas_como_no_arquivo_real(app):
+    csv_txt = ('"ULTIMA ATUALIZACAO";"20/11/2026 02:01"\n'
+               '"ANO";"MES";"SENADOR";"TIPO_DESPESA";"CNPJ_CPF";"FORNECEDOR";"DOCUMENTO";"DATA";"DETALHAMENTO";'
+               '"VALOR_REEMBOLSADO";"COD_DOCUMENTO"\n'
+               '"2026";"3";"BELTRANO SOUSA";"Passagem";"";"LATAM";"X";"01/03/2026";"";"186,00";"77"\n')
+    with app.app_context():
+        rodar(baixar_texto=lambda url: csv_txt if url.endswith("2026.csv") else "")
+        assert DespesaParlamentar.query.filter_by(cod_documento="77").count() == 1
