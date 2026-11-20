@@ -1,0 +1,11 @@
+{"ListaParlamentarEmExercicio": {"Parlamentares": {"Parlamentar": [
+  {"IdentificacaoParlamentar": {"CodigoParlamentar": "5001", "NomeParlamentar": "Beltrano Sousa",
+   "NomeCompletoParlamentar": "Beltrano de Sousa Lima", "SiglaPartidoParlamentar": "PY",
+   "UfParlamentar": "MA", "UrlFotoParlamentar": "http://www.senado.leg.br/senadores/img/fotos-oficiais/senador5001.jpg"}},
+  {"IdentificacaoParlamentar": {"CodigoParlamentar": "5002", "NomeParlamentar": "Ciclana Alves",
+   "NomeCompletoParlamentar": "Ciclana Alves Pereira", "SiglaPartidoParlamentar": "PZ",
+   "UfParlamentar": "MA", "UrlFotoParlamentar": "http://www.senado.leg.br/senadores/img/fotos-oficiais/senador5002.jpg"}},
+  {"IdentificacaoParlamentar": {"CodigoParlamentar": "5003", "NomeParlamentar": "Fulano de SP",
+   "NomeCompletoParlamentar": "Fulano de SP Souza", "SiglaPartidoParlamentar": "PW",
+   "UfParlamentar": "SP", "UrlFotoParlamentar": "http://www.senado.leg.br/senadores/img/fotos-oficiais/senador5003.jpg"}}
+]}}}
