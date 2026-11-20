@@ -1,0 +1,4 @@
+"DT_GERACAO";"SQ_PRESTADOR_CONTAS";"SQ_CANDIDATO";"NR_CPF_CNPJ_DOADOR";"NM_DOADOR";"DS_ORIGEM_RECEITA";"SQ_RECEITA";"DT_RECEITA";"VR_RECEITA";"DS_FONTE_RECEITA"
+"20/11/2026";"9001";"1001";"11122233344";"João da Padaria";"Recursos de pessoas físicas";"5001";"15/09/2024";"800,00";"x"
+"20/11/2026";"9001";"1001";"12345678000199";"Empresa Exemplo LTDA";"Recursos de pessoas jurídicas";"5002";"16/09/2024";"1500,00";"x"
+"20/11/2026";"9002";"1002";"55566677788";"Ana Souza";"Recursos de partido";"5003";"20/09/2024";"300,00";"x"
