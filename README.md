@@ -33,6 +33,7 @@ copy .env.example .env            # e preencha TRANSPARENCIA_API_KEY
 ```
 
 1. Abra o XAMPP e clique em **Start** no MySQL.
+   Antes, em **Config → my.ini**, na seção `[mysqld]`, troque `max_allowed_packet=1M` por `max_allowed_packet=64M` — algumas edições do Diário Oficial têm mais de 1 MB de texto.
 2. No MySQL Workbench, conecte em `localhost:3306` (usuário `root`, sem senha) e rode:
    ```sql
    CREATE DATABASE fiscal_ai CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

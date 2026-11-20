@@ -64,3 +64,9 @@ def test_convenios_so_do_municipio(app):
 
     assert coletar_convenios(date(2025, 1, 1), date(2025, 3, 31), "2111300", get=get_falso, pausa=0) == 1
     assert Convenio.query.one().numero == "945123"
+
+
+def test_data_com_texto_vira_none():
+    from app.services.coletores.transparencia import _data
+    assert _data("Sem informação") is None
+    assert _data("31/12/2025").isoformat() == "2025-12-31"

@@ -23,9 +23,12 @@ PAUSA_PADRAO = 0.7  # limite da API: ~90 requisições por minuto
 def _data(v: str | None) -> date | None:
     if not v:
         return None
-    if "/" in v:
-        return datetime.strptime(v[:10], "%d/%m/%Y").date()
-    return date.fromisoformat(v[:10])
+    try:
+        if "/" in v:
+            return datetime.strptime(v[:10], "%d/%m/%Y").date()
+        return date.fromisoformat(v[:10])
+    except ValueError:  # a API às vezes manda texto, ex.: "Sem informação"
+        return None
 
 
 def _digitos(v: str | None) -> str:
