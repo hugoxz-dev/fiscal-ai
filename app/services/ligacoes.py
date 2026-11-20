@@ -95,35 +95,47 @@ def _calcular(politico: Politico | None = None, fornecedor: Fornecedor | None = 
         for s in alvo:
             _add(Ligacao("politico_socio", confirmada, p, s.fornecedor, s.nome, None, ""))
 
-    # fornecedor_pf
+    # fornecedor_pf: caminhos confirmados primeiro (doador; é o próprio político), depois só por nome
     pf = q_forn.all()
     pf_por_doc = {f.documento: f for f in pf}
-    for p in politicos:
-        if p.cpf and p.cpf in pf_por_doc:
-            f = pf_por_doc[p.cpf]
-            _add(Ligacao("fornecedor_pf", True, p, f, f.nome, None, ""))
-        if not p.cpf:
-            for f in pf:
-                if normalizar(f.nome) == normalizar(p.nome):
-                    _add(Ligacao("fornecedor_pf", False, p, f, f.nome, None, ""))
     for d in doacoes:
         doc = cpf_valido(d.documento)
         if doc and doc in pf_por_doc:
             f = pf_por_doc[doc]
-            _add(Ligacao("fornecedor_pf", True, por_id[d.politico_id], f, f.nome, None, ""))
+            p = por_id[d.politico_id]
+            _add(Ligacao("fornecedor_pf", True, p, f, f.nome, d.valor or Decimal("0"), ""), soma=True)
+    for p in politicos:
+        if p.cpf and p.cpf in pf_por_doc:
+            f = pf_por_doc[p.cpf]
+            chave = ("fornecedor_pf", p.id, f.id, f.nome)
+            if chave in saida:
+                saida[chave].descricao = _descrever_pf_proprio(p, f)
+            else:
+                _add(Ligacao("fornecedor_pf", True, p, f, f.nome, None, _descrever_pf_proprio(p, f)))
+    for p in politicos:
+        if not p.cpf:
+            for f in pf:
+                if normalizar(f.nome) == normalizar(p.nome):
+                    _add(Ligacao("fornecedor_pf", False, p, f, f.nome, None, ""))
 
     # cota parlamentar
-    docs = {d.documento for d in q_desp.all() if d.documento}
+    despesas = q_desp.all()
+    docs = {d.documento for d in despesas if d.documento}
     forns = {f.documento: f for f in Fornecedor.query.filter(Fornecedor.documento.in_(docs)).all()} if docs else {}
-    for d in q_desp.all():
+    for d in despesas:
         f = forns.get(d.documento)
         if f and d.politico_id in por_id:
             _add(Ligacao("cota", True, por_id[d.politico_id], f, f.nome, d.valor or Decimal("0"), ""), soma=True)
 
     ligs = list(saida.values())
     for l in ligs:
-        l.descricao = _descrever(l)
+        if not l.descricao:
+            l.descricao = _descrever(l)
     return ligs
+
+
+def _descrever_pf_proprio(p: Politico, f: Fornecedor) -> str:
+    return f"{f.nome}, fornecedor pessoa física, é {p.nome}"
 
 
 def _descrever(l: Ligacao) -> str:
@@ -135,8 +147,9 @@ def _descrever(l: Ligacao) -> str:
     if l.tipo == "politico_socio":
         return f"{pol} consta como sócio de {forn}"
     if l.tipo == "fornecedor_pf":
-        return f"{forn}, fornecedor pessoa física, é {pol}" if l.confirmada else \
-            f"{forn}, fornecedor pessoa física, tem o mesmo nome de {pol}"
+        if l.confirmada:  # doação do fornecedor PF (o caso "é o político" já nasce com descrição)
+            return f"{forn}, fornecedor pessoa física, doou {v} a {pol}"
+        return f"{forn}, fornecedor pessoa física, tem o mesmo nome de {pol}"
     return f"{pol} pagou {v} de cota parlamentar a {forn}"
 
 

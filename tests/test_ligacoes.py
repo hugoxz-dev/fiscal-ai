@@ -65,7 +65,7 @@ def test_socio_pj_nao_liga(app):
     f = _forn()
     _socio(f, "Fulano de Tal", None)
     p = _pol()
-    _doacao(p, "Fulano de Tal", "12345678000199", "100.00")
+    _doacao(p, "Fulano de Tal", CPF_A, "100.00")
     assert ligacoes_do_politico(p) == []
 
 
@@ -104,6 +104,18 @@ def test_fornecedor_pf_doador_do_politico(app):
     _doacao(p, "Ciclano", CPF_B, "50.00")
     ligs = ligacoes_do_fornecedor(f)
     assert [l.tipo for l in ligs] == ["fornecedor_pf"] and ligs[0].confirmada
+    assert ligs[0].valor == Decimal("50.00")
+    assert ligs[0].descricao == "CICLANO, fornecedor pessoa física, doou R$ 50,00 a Beltrano da Silva"
+
+
+def test_pf_confirmada_por_doacao_nao_e_bloqueada_por_nome(app):
+    f = _forn(doc=CPF_B, nome="Beltrano da Silva", tipo="PF")
+    p = _pol(cpf=None)
+    assert [l.confirmada for l in ligacoes_do_politico(p)] == [False]
+    _doacao(p, "Beltrano da Silva", CPF_B, "70.00")
+    ligs = ligacoes_do_politico(p)
+    assert len(ligs) == 1 and ligs[0].confirmada and "doou R$ 70,00" in ligs[0].descricao
+    assert contar_ligacoes() == {p.id: 1}
 
 
 def test_cota_soma_por_fornecedor(app):
