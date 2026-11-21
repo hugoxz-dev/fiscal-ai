@@ -13,7 +13,7 @@ def create_app(config_override: dict | None = None) -> Flask:
     db.init_app(app)
 
     from .cli import registrar_comandos
-    from .controllers import (contas, contratos, exportacao, fornecedores, metodologia, monitoramento, painel,
+    from .controllers import (api, contas, contratos, exportacao, fornecedores, metodologia, monitoramento, painel,
                               planos, politicos)
     from .controllers._acesso import conferir_csrf, csrf_token, usuario_atual
     from .views._filtros import registrar_filtros
@@ -29,6 +29,7 @@ def create_app(config_override: dict | None = None) -> Flask:
     app.register_blueprint(planos.bp)
     app.register_blueprint(monitoramento.bp)
     app.register_blueprint(exportacao.bp)
+    app.register_blueprint(api.bp)
     app.before_request(conferir_csrf)
 
     @app.context_processor

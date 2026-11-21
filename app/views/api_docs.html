@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block titulo %}API{% endblock %}
+{% block conteudo %}
+<header class="cabecalho-pagina">
+  {% include "_enfeite.html" %}
+  <h1 class="display">API do Fiscal AI</h1>
+  <p class="lead">Os mesmos dados do painel, em JSON, para redações, pesquisadores e sistemas de controle. Recurso do plano Pro
+    ({{ limite }} chamadas por dia) e do Institucional (sem limite).</p>
+</header>
+
+<section class="bloco-conta">
+  <h2>Autenticação</h2>
+  <p>Gere sua chave em <a href="{{ url_for('contas.minha_conta') }}">Minha conta</a> e envie no cabeçalho <code>X-API-Key</code>.
+    Cada resposta traz <code>X-Limite-Diario</code> e <code>X-Chamadas-Hoje</code>.</p>
+  <div class="tabela-wrap"><pre class="mb-0"><code>curl -H "X-API-Key: fai_SUA_CHAVE" "{{ request.host_url }}api/v1/contratos?nivel=Alto"</code></pre></div>
+  <p class="mt-3 mb-0">Erros: <code>401</code> chave ausente ou inválida · <code>403</code> assinatura inativa · <code>429</code> limite diário atingido · <code>404</code> não encontrado.</p>
+</section>
+
+<section class="bloco-conta">
+  <h2>Endpoints</h2>
+  <div class="tabela-wrap">
+    <table class="lista">
+      <thead><tr><th>Rota</th><th>O que devolve</th></tr></thead>
+      <tbody>
+        <tr><td><code>GET /api/v1/contratos</code></td><td>Lista paginada. Filtros iguais aos da página de contratos: <code>nivel</code>, <code>orgao</code>, <code>modalidade</code>, <code>fornecedor</code>, <code>de</code>, <code>ate</code>, <code>ordem</code>; paginação com <code>pagina</code> e <code>por_pagina</code> (até 100).</td></tr>
+        <tr><td><code>GET /api/v1/contratos/&lt;id&gt;</code></td><td>Um contrato com os alertas e as evidências.</td></tr>
+        <tr><td><code>GET /api/v1/fornecedores/&lt;id&gt;</code></td><td>Fornecedor, contratos, alertas e ligações com políticos.</td></tr>
+        <tr><td><code>GET /api/v1/alertas</code></td><td>Alertas mais recentes; filtro <code>regra</code> (ex.: <code>dispensa_limite</code>).</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="bloco-conta">
+  <h2>Exemplo de resposta</h2>
+  <div class="tabela-wrap"><pre class="mb-0"><code>{
+  "pagina": 1, "por_pagina": 25, "total": 113,
+  "itens": [{
+    "id": 42, "objeto": "Aquisição de ...", "valor_global": "90000.00", "score": 65, "nivel": "Alto",
+    "fornecedor": {"id": 7, "nome": "EMPRESA X LTDA", "documento": "12.345.678/0001-99", "tipo": "PJ"},
+    "url": "{{ request.host_url }}contratos/42"
+  }]
+}</code></pre></div>
+  <p class="mt-3 mb-0 text-muted">Privacidade: CPF de fornecedor pessoa física sai mascarado, como no site. {{ AVISO }}</p>
+</section>
+{% endblock %}

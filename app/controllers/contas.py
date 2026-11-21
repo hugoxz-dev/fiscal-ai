@@ -1,7 +1,8 @@
-from flask import Blueprint, redirect, render_template, request, session, url_for
+from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 
+from ..services import api_chaves
 from ..services import contas as svc
-from ._acesso import login_obrigatorio, next_seguro, usuario_atual
+from ._acesso import login_obrigatorio, next_seguro, pro_obrigatorio, usuario_atual
 
 bp = Blueprint("contas", __name__)
 
@@ -45,4 +46,24 @@ def sair():
 @login_obrigatorio
 def minha_conta():
     u = usuario_atual()
-    return render_template("conta.html", u=u, assinatura=svc.assinatura_ativa(u))
+    chave = api_chaves.ativa(u)
+    return render_template("conta.html", u=u, assinatura=svc.assinatura_ativa(u), chave=chave,
+                           chamadas_hoje=api_chaves.chamadas_hoje(chave) if chave else 0,
+                           chave_nova=session.pop("chave_nova", None))
+
+
+@bp.route("/conta/chave", methods=["POST"])
+@pro_obrigatorio
+def gerar_chave():
+    # a chave completa vai só uma vez para a sessão e é exibida (e descartada) na próxima página
+    session["chave_nova"] = api_chaves.gerar(usuario_atual())
+    flash("Chave de API gerada. Copie agora: ela não será mostrada de novo.")
+    return redirect(url_for("contas.minha_conta"))
+
+
+@bp.route("/conta/chave/revogar", methods=["POST"])
+@pro_obrigatorio
+def revogar_chave():
+    api_chaves.revogar(usuario_atual())
+    flash("Chave de API revogada.")
+    return redirect(url_for("contas.minha_conta"))
