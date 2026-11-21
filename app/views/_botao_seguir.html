@@ -1,0 +1,19 @@
+{# Espera: tipo ("fornecedor" | "politico") e alvo_id #}
+<div class="acoes-pro">
+  {% if e_pro_atual() %}
+    {% if segue(tipo, alvo_id) %}
+    <form method="post" action="{{ url_for('monitoramento.deixar', tipo=tipo, id=alvo_id) }}">
+      <input type="hidden" name="csrf" value="{{ csrf_token() }}"><input type="hidden" name="next" value="{{ request.path }}">
+      <button class="botao-secundario" type="submit">✓ Seguindo · Deixar de seguir</button>
+    </form>
+    {% else %}
+    <form method="post" action="{{ url_for('monitoramento.seguir', tipo=tipo, id=alvo_id) }}">
+      <input type="hidden" name="csrf" value="{{ csrf_token() }}"><input type="hidden" name="next" value="{{ request.path }}">
+      <button class="botao" type="submit">Seguir</button>
+    </form>
+    {% endif %}
+  {% else %}
+    <a class="botao-secundario bloqueado" href="/planos" title="Recurso do plano Pro">🔒 Seguir <small>(Pro)</small></a>
+  {% endif %}
+  {% block extras %}{% endblock %}
+</div>

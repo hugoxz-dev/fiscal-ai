@@ -3,6 +3,7 @@
 {% block conteudo %}
 <p><a class="voltar" href="{{ url_for('contratos.lista') }}">Voltar para contratos</a></p>
 <h1>{{ f.nome }}</h1>
+{% with tipo="fornecedor", alvo_id=f.id %}{% include "_botao_seguir.html" %}{% endwith %}
 
 <dl class="dados">
   <div><dt>{{ 'CPF' if f.tipo == 'PF' else 'CNPJ' }}</dt><dd>{{ f.documento | cnpj }}</dd></div>

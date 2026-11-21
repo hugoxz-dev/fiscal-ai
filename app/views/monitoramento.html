@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block titulo %}Meu painel{% endblock %}
+{% block conteudo %}
+<header class="cabecalho-pagina">
+  <h1 class="display">Meu painel</h1>
+  <p class="lead">O que mudou desde a sua última visita nos fornecedores e políticos que você segue.
+    {% if total %}<strong>{{ total }} novidade{{ "s" if total != 1 }}.</strong>{% endif %}</p>
+</header>
+
+{% if not itens %}
+<section class="bloco-conta">
+  <p>Você ainda não segue ninguém. Abra a ficha de um <a href="{{ url_for('contratos.lista') }}">fornecedor</a> ou de um
+    <a href="{{ url_for('politicos.lista') }}">político</a> e clique em <strong>Seguir</strong>.</p>
+</section>
+{% endif %}
+
+{% for i in itens %}
+{% set s, alvo = i.seguido, i.alvo %}
+<section class="bloco-conta">
+  <h2 class="h4">
+    {% if s.tipo == "fornecedor" %}<a href="{{ url_for('fornecedores.detalhe', id=alvo.id) }}">{{ alvo.nome }}</a>
+    {% else %}<a href="{{ url_for('politicos.detalhe', id=alvo.id) }}">{{ alvo.nome_urna or alvo.nome }}</a> <small class="text-muted">{{ alvo.cargo }}</small>{% endif %}
+  </h2>
+  {% if not i.contratos and not i.alertas %}
+    <p class="text-muted mb-0">Nada novo.</p>
+  {% else %}
+    {% if i.contratos %}
+    <p><strong>{{ i.contratos|length }} contrato{{ "s" if i.contratos|length != 1 }} novo{{ "s" if i.contratos|length != 1 }}</strong>{% if s.tipo == "politico" %} de fornecedores com ligação confirmada{% endif %}</p>
+    <ul>{% for c in i.contratos %}
+      <li><a href="{{ url_for('contratos.detalhe', id=c.id) }}">{{ c.objeto|truncate(110) }}</a> · {{ c.valor_global|moeda }}
+        {% if c.nivel %}<span class="etiqueta nivel-{{ c.nivel }}">{{ c.nivel }}</span>{% endif %}</li>
+    {% endfor %}</ul>
+    {% endif %}
+    {% if i.alertas %}
+    <p><strong>{{ i.alertas|length }} alerta{{ "s" if i.alertas|length != 1 }} novo{{ "s" if i.alertas|length != 1 }}</strong></p>
+    <ul>{% for a in i.alertas %}
+      <li><a href="{{ url_for('contratos.detalhe', id=a.contrato_id) }}">{{ a.regra_codigo|replace("_", " ") }}</a> (+{{ a.pontos }}) em {{ a.contrato.objeto|truncate(80) }}</li>
+    {% endfor %}</ul>
+    {% endif %}
+  {% endif %}
+</section>
+{% endfor %}
+<p class="text-muted">Novidades são contratos e alertas que entraram no banco depois da sua última visita a esta página. {{ AVISO }}</p>
+{% endblock %}

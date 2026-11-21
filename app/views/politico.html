@@ -19,6 +19,7 @@
     <h1>{{ nome_exibido }}</h1>
     <p class="lead">{{ p.cargo }}{% if p.partido %} ({{ p.partido }}){% endif %}
       · {{ p.municipio or '' }}{{ '/' if p.municipio }}{{ p.uf }}{% if p.ano_eleicao %} · eleito {{ p.ano_eleicao }}{% endif %}</p>
+    {% with tipo="politico", alvo_id=p.id %}{% include "_botao_seguir.html" %}{% endwith %}
   </div>
 </div>
 

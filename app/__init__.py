@@ -13,7 +13,7 @@ def create_app(config_override: dict | None = None) -> Flask:
     db.init_app(app)
 
     from .cli import registrar_comandos
-    from .controllers import contas, contratos, fornecedores, metodologia, painel, planos, politicos
+    from .controllers import contas, contratos, fornecedores, metodologia, monitoramento, painel, planos, politicos
     from .controllers._acesso import conferir_csrf, csrf_token, usuario_atual
     from .views._filtros import registrar_filtros
 
@@ -26,17 +26,21 @@ def create_app(config_override: dict | None = None) -> Flask:
     app.register_blueprint(politicos.bp)
     app.register_blueprint(contas.bp)
     app.register_blueprint(planos.bp)
+    app.register_blueprint(monitoramento.bp)
     app.before_request(conferir_csrf)
 
     @app.context_processor
     def _conta():
+        from .services import monitoramento as mon
         from .services.contas import e_pro
 
         def novidades_qtd() -> int:
-            return 0
+            u = usuario_atual()
+            return mon.contar(u) if u is not None and e_pro(u) else 0
 
         return {"usuario_atual": usuario_atual, "e_pro_atual": lambda: e_pro(usuario_atual()),
-                "csrf_token": csrf_token, "novidades_qtd": novidades_qtd}
+                "csrf_token": csrf_token, "novidades_qtd": novidades_qtd,
+                "segue": lambda tipo, alvo_id: mon.segue(usuario_atual(), tipo, alvo_id)}
 
     @app.context_processor
     def _aviso():
