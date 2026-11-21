@@ -87,3 +87,10 @@ def test_post_sem_csrf_recusado():
 def test_painel_publico_continua_sem_login(client):
     for url in ("/", "/contratos", "/politicos", "/metodologia"):
         assert client.get(url).status_code == 200, url
+
+
+def test_next_com_caractere_de_controle_ignorado(client, fazer_usuario):
+    fazer_usuario()
+    for n in ("/%09/evil.com", "/%0A/evil.com", "/%0D/evil.com"):
+        r = _entrar(client, next_=n)
+        assert r.status_code == 302 and r.headers["Location"].endswith("/conta"), n

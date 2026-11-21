@@ -94,3 +94,10 @@ def test_contrato_dict_formato(app, fazer_contrato):
         d = exportacao.contrato_dict(c, com_alertas=True)
     assert d["valor_global"] == "10.50" and d["data_assinatura"] == "2025-05-01"
     assert d["fornecedor"]["documento"] == "12.345.678/0001-99" and d["alertas"] == []
+
+
+def test_csv_neutraliza_formula(client, pro_logado, fazer_contrato):
+    fazer_contrato(objeto='=HYPERLINK("http://x","clique")',
+                   fornecedor=Fornecedor(documento="99999999000199", nome="+SOMA LTDA", tipo="PJ"))
+    _, linha = _linhas(client.get("/contratos.csv"))
+    assert linha[2].startswith("'=") and linha[3] == "'+SOMA LTDA"

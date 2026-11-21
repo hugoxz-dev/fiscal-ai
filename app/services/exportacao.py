@@ -61,11 +61,16 @@ def fornecedor_dict(f: Fornecedor) -> dict:
     return d
 
 
+def _celula(v):
+    """Texto de terceiros (PNCP) começando com = + - @ viraria fórmula no Excel: prefixa com apóstrofo."""
+    return "'" + v if isinstance(v, str) and v[:1] in ("=", "+", "-", "@", "\t", "\r") else v
+
+
 def _csv(cabecalho: list[str], linhas) -> str:
     buf = io.StringIO()
     w = csv.writer(buf, delimiter=";", lineterminator="\r\n")
     w.writerow(cabecalho)
-    w.writerows(linhas)
+    w.writerows([_celula(v) for v in linha] for linha in linhas)
     return BOM + buf.getvalue()
 
 

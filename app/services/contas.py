@@ -59,6 +59,8 @@ def assinar(u: Usuario, periodo: str, hoje: date | None = None) -> Assinatura:
     hoje = hoje or date.today()
     dias = timedelta(days=DURACAO[periodo])
     a = assinatura_ativa(u, hoje)
+    if a is not None and a.plano != "pro":
+        raise ValueError("Conta institucional: o plano é gerido pelo administrador.")
     if a is None:
         a = Assinatura(plano="pro", inicio=hoje, fim=hoje + dias)
         u.assinaturas.append(a)

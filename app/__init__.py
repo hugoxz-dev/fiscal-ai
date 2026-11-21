@@ -30,6 +30,8 @@ def create_app(config_override: dict | None = None) -> Flask:
     app.register_blueprint(monitoramento.bp)
     app.register_blueprint(exportacao.bp)
     app.register_blueprint(api.bp)
+    from werkzeug.exceptions import HTTPException
+    app.register_error_handler(HTTPException, api.erro_http)
     app.before_request(conferir_csrf)
 
     @app.context_processor

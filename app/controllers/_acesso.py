@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import secrets
 from functools import wraps
+from urllib.parse import urlsplit
 
 from flask import abort, current_app, flash, g, redirect, request, session, url_for
 
@@ -23,8 +24,12 @@ def usuario_atual() -> Usuario | None:
 
 def next_seguro(valor: str | None) -> str:
     """Só aceita caminho interno; qualquer coisa que possa sair do site vira a página da conta."""
-    if valor and valor.startswith("/") and not valor.startswith("//") and "\\" not in valor:
-        return valor
+    # caracteres de controle (tab, quebra de linha) são descartados pelos navegadores: "/\t/x.com" vira "//x.com"
+    if (valor and valor.startswith("/") and not valor.startswith("//") and "\\" not in valor
+            and not any(ord(ch) < 0x20 or ord(ch) == 0x7F for ch in valor)):
+        partes = urlsplit(valor)
+        if not partes.scheme and not partes.netloc:
+            return valor
     return url_for("contas.minha_conta")
 
 

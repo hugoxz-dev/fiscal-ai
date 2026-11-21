@@ -103,3 +103,20 @@ def test_pedido_institucional_invalido(client):
     r = client.post("/planos/institucional", data={"nome": "Bia", "orgao": "", "municipio": "X", "email": "sem-arroba"})
     assert r.status_code == 200 and PedidoInstitucional.query.count() == 0
     assert "Preencha" in r.get_data(as_text=True)
+
+
+def test_checkout_nao_mexe_em_conta_institucional(client, fazer_usuario, logar):
+    u = fazer_usuario(plano="institucional")
+    logar(client, u)
+    r = client.get("/planos/checkout?periodo=mensal")
+    assert r.status_code == 302 and r.headers["Location"].endswith("/conta")
+    client.post("/planos/checkout?periodo=mensal", data=CARTAO)
+    assert u.assinaturas[0].plano == "institucional" and u.assinaturas[0].valor == Decimal("19.90")  # fixture
+    assert len(u.assinaturas) == 1 and u.assinaturas[0].periodo == "mensal"
+
+
+def test_assinar_recusa_conta_institucional(app, fazer_usuario):
+    import pytest
+
+    with pytest.raises(ValueError):
+        contas.assinar(fazer_usuario(plano="institucional"), "anual")

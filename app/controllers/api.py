@@ -49,8 +49,8 @@ def _cabecalhos(resposta):
     return resposta
 
 
-@bp.errorhandler(HTTPException)
-def _http(e):
+def erro_http(e: HTTPException):
+    """Registrado no app inteiro: rotas inexistentes e métodos errados não passam pelo blueprint."""
     if request.path.startswith("/api/v1/"):
         return _erro(e.code, e.description if e.code != 404 else "não encontrado")
     return e

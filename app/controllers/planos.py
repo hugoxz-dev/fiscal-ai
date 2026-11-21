@@ -22,6 +22,10 @@ def checkout():
     periodo = request.args.get("periodo", "mensal")
     if periodo not in svc.PRECOS:
         abort(404)
+    atual = svc.assinatura_ativa(usuario_atual())
+    if atual is not None and atual.plano != "pro":
+        flash("Sua conta é Institucional: o plano é gerido pelo administrador.")
+        return redirect(url_for("contas.minha_conta"))
     erro = None
     if request.method == "POST":
         # modo demonstração: os campos do cartão só precisam estar preenchidos e são descartados aqui

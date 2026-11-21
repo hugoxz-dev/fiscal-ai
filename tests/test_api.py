@@ -151,3 +151,11 @@ def test_api_ignora_csrf(app, chave_pro):
     app.config["CSRF_ATIVO"] = True
     _, chave = chave_pro
     assert app.test_client().post("/api/v1/contratos", headers={"X-API-Key": chave}).status_code == 405
+
+
+def test_api_rota_inexistente_e_metodo_errado_em_json(client, chave_pro):
+    _, chave = chave_pro
+    r = _get(client, "/api/v1/inexistente", chave)
+    assert r.status_code == 404 and r.is_json
+    r = client.post("/api/v1/contratos", headers={"X-API-Key": chave})
+    assert r.status_code == 405 and r.is_json
