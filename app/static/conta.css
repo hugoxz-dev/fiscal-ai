@@ -18,3 +18,14 @@
 .contador-novidades { display: inline-block; min-width: 1.3rem; padding: 0 .35rem; margin-left: .25rem; border-radius: 999px; background: var(--coral); color: var(--branco); font-size: .75rem; font-weight: 700; text-align: center; line-height: 1.3rem; }
 code.chave { display: block; padding: .6rem .8rem; background: var(--fundo); border-radius: 8px; word-break: break-all; }
 @media (max-width: 560px) { .form-conta .linha-2 { grid-template-columns: 1fr; } .cartao-conta { padding: 1.25rem; } }
+.grade-planos { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 1.25rem; align-items: stretch; }
+.plano { position: relative; background: var(--branco); border: 1px solid var(--linha); border-radius: var(--raio); padding: 1.75rem 1.5rem; display: flex; flex-direction: column; gap: .5rem; }
+.plano h2 { margin: 0; }
+.plano ul { padding-left: 1.1rem; flex: 1; }
+.plano li { margin-bottom: .35rem; }
+.plano.destaque { border: 3px solid var(--azul); box-shadow: 0 10px 30px rgba(14, 53, 157, .12); }
+.plano .preco { font-family: var(--fonte-titulo); font-size: 2rem; font-weight: 800; margin: 0; color: var(--azul); }
+.plano .preco small { font-size: 1rem; font-weight: 600; color: var(--tinta-suave); }
+.plano .para-quem { color: var(--tinta-suave); margin: 0; }
+.plano .fita { position: absolute; top: -.8rem; right: 1.2rem; background: var(--coral); color: var(--branco); border-radius: 999px; padding: .15rem .75rem; font-weight: 700; font-size: .8rem; }
+.resumo-compra { background: var(--azul-claro); border-radius: 10px; padding: .6rem .9rem; }

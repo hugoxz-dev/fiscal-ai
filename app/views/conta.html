@@ -15,6 +15,14 @@
       {% else %}ativo até {{ assinatura.fim|data_br }}{% if assinatura.periodo != "manual" %} ({{ assinatura.periodo }}, {{ assinatura.valor|moeda }}){% endif %}.{% endif %}
     </p>
     <p class="aviso-demo">Modo demonstração — nenhuma cobrança é feita.</p>
+    {% if assinatura.status == "ativa" and assinatura.plano == "pro" %}
+    <form method="post" action="{{ url_for('planos.cancelar') }}">
+      <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+      <button class="botao-secundario" type="submit">Cancelar assinatura</button>
+    </form>
+    {% elif assinatura.status == "cancelada" %}
+    <a class="botao" href="{{ url_for('planos.pagina') }}">Reativar</a>
+    {% endif %}
   {% else %}
     <p>Você está no plano <strong>Cidadão</strong> (grátis).</p>
     <a class="botao" href="/planos">Conhecer o plano Pro</a>

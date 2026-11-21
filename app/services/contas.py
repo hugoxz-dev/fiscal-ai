@@ -50,3 +50,28 @@ def assinatura_ativa(u: Usuario | None, hoje: date | None = None) -> Assinatura 
 
 def e_pro(u: Usuario | None, hoje: date | None = None) -> bool:
     return assinatura_ativa(u, hoje) is not None
+
+
+def assinar(u: Usuario, periodo: str, hoje: date | None = None) -> Assinatura:
+    """Checkout de demonstração. Se já há assinatura vigente, estende o fim em vez de criar outra."""
+    if periodo not in PRECOS:
+        raise ValueError(f"Período inválido: {periodo}")
+    hoje = hoje or date.today()
+    dias = timedelta(days=DURACAO[periodo])
+    a = assinatura_ativa(u, hoje)
+    if a is None:
+        a = Assinatura(plano="pro", inicio=hoje, fim=hoje + dias)
+        u.assinaturas.append(a)
+    else:
+        a.fim = a.fim + dias
+    a.periodo, a.valor, a.status = periodo, PRECOS[periodo], "ativa"
+    db.session.commit()
+    return a
+
+
+def cancelar(u: Usuario) -> None:
+    """Cancela a renovação; o acesso continua até o fim já pago."""
+    a = assinatura_ativa(u)
+    if a is not None:
+        a.status = "cancelada"
+        db.session.commit()

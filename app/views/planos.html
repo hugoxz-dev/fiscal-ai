@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block titulo %}Planos{% endblock %}
+{% block conteudo %}
+<header class="cabecalho-pagina">
+  {% include "_enfeite.html" %}
+  <h1 class="display">Planos</h1>
+  <p class="lead">Os dados públicos continuam abertos para todo mundo, sem login. Quem trabalha com eles todo dia paga pela conveniência: acompanhar, exportar e integrar.</p>
+</header>
+{% include "_mensagens.html" %}
+
+<div class="grade-planos">
+  <article class="plano">
+    <h2>Cidadão</h2>
+    <p class="preco">Grátis</p>
+    <p class="para-quem">Para qualquer pessoa</p>
+    <ul>
+      <li>Todos os contratos, alertas e evidências</li>
+      <li>Fichas de fornecedores e políticos</li>
+      <li>Ligações com fontes públicas</li>
+      <li>Metodologia aberta</li>
+    </ul>
+    <a class="botao-secundario" href="{{ url_for('contratos.lista') }}">Usar o painel</a>
+  </article>
+
+  <article class="plano destaque">
+    <span class="fita">Mais escolhido</span>
+    <h2>Pro</h2>
+    <p class="preco">{{ precos.mensal|moeda }}<small>/mês</small></p>
+    <p class="para-quem">ou {{ precos.anual|moeda }}/ano · jornalistas, assessores, pesquisadores, ONGs</p>
+    <ul>
+      <li><strong>Monitoramento:</strong> siga fornecedores e políticos e veja o que mudou desde a sua última visita</li>
+      <li><strong>Exportação CSV</strong> dos contratos filtrados e dos alertas</li>
+      <li><strong>Relatórios para impressão</strong> das fichas, prontos para PDF</li>
+      <li><strong>API</strong> com chave própria (1.000 chamadas por dia)</li>
+    </ul>
+    {% if e_pro_atual() %}
+      <a class="botao" href="{{ url_for('contas.minha_conta') }}">Você já é Pro</a>
+    {% else %}
+      <div class="acoes-pro">
+        <a class="botao" href="{{ url_for('planos.checkout', periodo='mensal') }}">Assinar mensal</a>
+        <a class="botao-secundario" href="{{ url_for('planos.checkout', periodo='anual') }}">Anual (2 meses grátis)</a>
+      </div>
+    {% endif %}
+    <p class="aviso-demo">Modo demonstração — nenhuma cobrança é feita.</p>
+  </article>
+
+  <article class="plano">
+    <h2>Institucional</h2>
+    <p class="preco">Sob consulta</p>
+    <p class="para-quem">a partir de R$ 490/mês por município · câmaras, redações, controle interno, outras prefeituras</p>
+    <ul>
+      <li>Fiscal AI instalado para <strong>outro município</strong> (código IBGE configurável)</li>
+      <li>Tudo do Pro, para a equipe</li>
+      <li>API sem limite diário</li>
+      <li>Suporte e acompanhamento da coleta</li>
+    </ul>
+    <a class="botao-secundario" href="#demonstracao">Solicitar demonstração</a>
+  </article>
+</div>
+
+<section id="demonstracao" class="bloco-conta mt-4">
+  <h2>Solicitar demonstração do plano Institucional</h2>
+  {% if erro_pedido %}<p class="erro-form" role="alert">{{ erro_pedido }}</p>{% endif %}
+  <form method="post" action="{{ url_for('planos.institucional') }}#demonstracao" class="form-conta">
+    <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+    <div class="linha-2">
+      <label>Seu nome <input name="nome" value="{{ pedido.get('nome', '') }}" required maxlength="120"></label>
+      <label>E-mail <input type="email" name="email" value="{{ pedido.get('email', '') }}" required maxlength="190"></label>
+    </div>
+    <div class="linha-2">
+      <label>Órgão ou organização <input name="orgao" value="{{ pedido.get('orgao', '') }}" required maxlength="190"></label>
+      <label>Município <input name="municipio" value="{{ pedido.get('municipio', '') }}" required maxlength="120"></label>
+    </div>
+    <label>Mensagem <textarea name="mensagem" rows="3" maxlength="2000">{{ pedido.get('mensagem', '') }}</textarea></label>
+    <button class="botao" type="submit">Enviar pedido</button>
+  </form>
+</section>
+{% endblock %}

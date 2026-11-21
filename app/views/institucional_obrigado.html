@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block titulo %}Pedido recebido{% endblock %}
+{% block conteudo %}
+<section class="cartao-conta">
+  <h1>Recebemos seu pedido</h1>
+  <p>Obrigado, {{ nome }}. Entraremos em contato para agendar a demonstração do plano Institucional.</p>
+  <a class="botao" href="{{ url_for('planos.pagina') }}">Voltar aos planos</a>
+</section>
+{% endblock %}
