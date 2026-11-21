@@ -9,6 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..100,600..900&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <link href="{{ url_for('static', filename='vendor/bootstrap.min.css') }}" rel="stylesheet">
   <link href="{{ url_for('static', filename='fiscal.css', v='2026-11-20a') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='conta.css', v='2026-11-20a') }}" rel="stylesheet">
 </head>
 <body>
   <header class="topo">
@@ -29,6 +30,12 @@
         <a href="/contratos" class="{{ 'ativo' if atual.startswith('contratos') }}">Contratos</a>
         <a href="/politicos" class="{{ 'ativo' if atual.startswith('politicos') }}">Políticos</a>
         <a href="{{ url_for('metodologia.pagina') }}" class="{{ 'ativo' if atual.startswith('metodologia') }}">Metodologia</a>
+        <a href="/planos" class="{{ 'ativo' if atual.startswith('planos') }}">Planos</a>
+        {% if usuario_atual() %}
+        <a href="{{ url_for('contas.minha_conta') }}" class="{{ 'ativo' if atual.startswith('contas') or atual.startswith('monitoramento') }}">Minha conta{% set qtd = novidades_qtd() %}{% if qtd %}<span class="contador-novidades" title="Novidades no seu monitoramento">{{ qtd }}</span>{% endif %}</a>
+        {% else %}
+        <a href="{{ url_for('contas.entrar') }}" class="{{ 'ativo' if atual.startswith('contas') }}">Entrar</a>
+        {% endif %}
       </nav>
     </div>
   </header>

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block titulo %}Criar conta{% endblock %}
+{% block conteudo %}
+<section class="cartao-conta">
+  <h1>Criar conta</h1>
+  <p class="text-muted">Grátis. Depois você pode assinar o plano Pro para seguir fornecedores e políticos, exportar dados e usar a API.</p>
+  {% if erro %}<p class="erro-form" role="alert">{{ erro }}</p>{% endif %}
+  <form method="post" action="{{ url_for('contas.cadastro', next=proximo or None) }}" class="form-conta">
+    <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+    <label>Nome <input name="nome" value="{{ form.get('nome', '') }}" required maxlength="120" autocomplete="name"></label>
+    <label>E-mail <input type="email" name="email" value="{{ form.get('email', '') }}" required autocomplete="email"></label>
+    <label>Senha <small>(mínimo de 8 caracteres)</small> <input type="password" name="senha" required minlength="8" autocomplete="new-password"></label>
+    <button class="botao" type="submit">Criar conta</button>
+  </form>
+  <p>Já tem conta? <a href="{{ url_for('contas.entrar', next=proximo or None) }}">Entrar</a></p>
+</section>
+{% endblock %}
