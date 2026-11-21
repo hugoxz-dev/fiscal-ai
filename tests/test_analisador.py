@@ -108,3 +108,36 @@ def test_cli_analisar_sem_ollama(app, cenario, monkeypatch):
     out = app.test_cli_runner().invoke(args=["analisar"]).output
     assert "Ollama indisponível — regra de CNAE usa só os julgamentos já guardados" in out
     assert "Alto: 1" in out
+
+
+def test_contrato_ganha_coletado_em(app, fazer_contrato):
+    c = fazer_contrato()
+    assert c.coletado_em is not None
+
+
+def test_reanalise_preserva_criado_em_de_alerta_da_mesma_regra(app, cenario):
+    from datetime import datetime
+
+    ruim, _ = cenario
+    analisar_todos(LLMFalso())
+    assert ruim.alertas
+    antigo = datetime(2025, 1, 1)
+    for a in ruim.alertas:
+        a.criado_em = antigo
+    db.session.commit()
+    analisar_todos(LLMFalso())
+    assert ruim.alertas and all(a.criado_em == antigo for a in ruim.alertas)
+
+
+def test_reanalise_alerta_de_regra_nova_recebe_hora_atual(app, cenario):
+    from datetime import datetime
+
+    ruim, _ = cenario
+    analisar_todos(LLMFalso())
+    antigo = datetime(2025, 1, 1)
+    # mantém só um alerta antigo, de regra que não existe: todos os reais passam a ser "novos"
+    ruim.alertas.clear()
+    ruim.alertas.append(Alerta(regra_codigo="regra_inexistente", pontos=1, evidencia={}, criado_em=antigo))
+    db.session.commit()
+    analisar_todos(LLMFalso())
+    assert ruim.alertas and all(a.criado_em > antigo for a in ruim.alertas)

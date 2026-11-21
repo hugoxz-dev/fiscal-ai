@@ -44,10 +44,12 @@ def analisar_todos(llm) -> dict:
     agora = datetime.now()
     for contrato in ctx.contratos:
         resultados = [res for r in regras if (res := r.avaliar(contrato, ctx)) is not None]
+        # alerta que já existia na mesma regra mantém a data original (base das "novidades" do monitoramento)
+        antigos = {a.regra_codigo: a.criado_em for a in contrato.alertas}
         contrato.alertas.clear()
         for res in resultados:
-            contrato.alertas.append(Alerta(regra_codigo=res.codigo, pontos=res.pontos,
-                                           evidencia=res.evidencia, criado_em=agora))
+            contrato.alertas.append(Alerta(regra_codigo=res.codigo, pontos=res.pontos, evidencia=res.evidencia,
+                                           criado_em=antigos.get(res.codigo, agora)))
         score = min(100, sum(res.pontos for res in resultados))
         if score != contrato.score:
             contrato.explicacao = None  # indícios mudaram: a explicação antiga não vale mais

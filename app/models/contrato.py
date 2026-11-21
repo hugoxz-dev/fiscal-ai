@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from ..extensions import db
 from ._tipos import Dinheiro
 
@@ -21,6 +23,7 @@ class Contrato(db.Model):
     nivel = db.Column(db.String(10))
     explicacao = db.Column(db.Text)
     analisado_em = db.Column(db.DateTime)
+    coletado_em = db.Column(db.DateTime, nullable=False, default=datetime.now)  # entrada no banco; nunca muda
 
     orgao = db.relationship("Orgao", back_populates="contratos")
     fornecedor = db.relationship("Fornecedor", back_populates="contratos")
