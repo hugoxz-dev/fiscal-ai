@@ -187,3 +187,65 @@ def registrar_comandos(app: Flask) -> None:
         except ErroValidacao as e:
             raise click.ClickException(str(e))
         click.echo("\nPrecisão = acertos / (acertos + falsos positivos); inconclusivos e pendentes ficam fora.")
+
+    @app.cli.group("negocio")
+    def negocio():
+        """Modelo de negócio: métricas, dados de demonstração e contas institucionais."""
+
+    @negocio.command("resumo")
+    def negocio_resumo():
+        """Mostra contas, assinantes, receita mensal simulada (MRR), uso da API e pedidos institucionais."""
+        from .services.negocio import resumo
+        from .views._filtros import moeda
+
+        r = resumo()
+        linhas = [("Contas", r["contas"]), ("Assinantes Pro vigentes", r["pro_ativos"]),
+                  ("Clientes institucionais", r["institucionais_ativos"]),
+                  ("Receita mensal recorrente (MRR, simulada)", moeda(r["mrr"])),
+                  ("Assinaturas canceladas (ainda vigentes)", r["cancelamentos"]),
+                  ("Itens seguidos", r["seguidos"]), ("Chamadas de API (30 dias)", r["chamadas_api_30d"]),
+                  ("Pedidos de demonstração institucional", r["pedidos_institucionais"])]
+        largura = max(len(n) for n, _ in linhas)
+        for nome, valor in linhas:
+            click.echo(f"{nome.ljust(largura)}  {valor}")
+        click.echo("\nModo demonstração: nenhuma cobrança real é feita.")
+
+    @negocio.command("demo")
+    @click.option("--limpar", is_flag=True, help="Só remove as contas fictícias (@demo.fiscal-ai.local)")
+    def negocio_demo(limpar):
+        """Cria contas fictícias para a apresentação (nunca cria dado público)."""
+        from .services.negocio import EMAIL_BANCA, criar_demo, limpar_demo
+
+        if limpar:
+            click.echo(f"{limpar_demo()} contas de demonstração removidas.")
+            return
+        senha = criar_demo()
+        click.echo("Contas de demonstração criadas.")
+        click.echo(f"Conta da banca (Pro, segue os 3 fornecedores com mais contratos há 90 dias):\n"
+                   f"  e-mail: {EMAIL_BANCA}\n  senha:  {senha}")
+
+    @negocio.command("institucional")
+    @click.option("--email", required=True, help="E-mail de uma conta já cadastrada")
+    @click.option("--meses", default=12, show_default=True, type=click.IntRange(1, 60))
+    def negocio_institucional(email, meses):
+        """Ativa o plano Institucional (API sem limite) para uma conta."""
+        from .services.negocio import criar_institucional
+
+        try:
+            a = criar_institucional(email, meses)
+        except LookupError as e:
+            raise click.ClickException(str(e))
+        click.echo(f"Plano Institucional ativo para {email} até {a.fim:%d/%m/%Y}.")
+
+    @app.cli.command("leads")
+    def leads():
+        """Lista os pedidos de demonstração do plano Institucional, do mais novo ao mais antigo."""
+        from .models import PedidoInstitucional
+
+        pedidos = PedidoInstitucional.query.order_by(PedidoInstitucional.criado_em.desc()).all()
+        if not pedidos:
+            click.echo("Nenhum pedido ainda.")
+        for p in pedidos:
+            click.echo(f"{p.criado_em:%d/%m/%Y %H:%M}  {p.orgao} ({p.municipio}) — {p.nome} <{p.email}>")
+            if p.mensagem:
+                click.echo(f"    {p.mensagem}")
