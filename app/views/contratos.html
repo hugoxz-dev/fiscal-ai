@@ -54,7 +54,11 @@
   <div><button class="btn btn-azulejo" type="submit">Filtrar</button></div>
 </form>
 
-<p class="contagem">{{ paginacao.total }} contrato{{ 's' if paginacao.total != 1 }} encontrado{{ 's' if paginacao.total != 1 }}.</p>
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+  <p class="contagem mb-0">{{ paginacao.total }} contrato{{ 's' if paginacao.total != 1 }} encontrado{{ 's' if paginacao.total != 1 }}.</p>
+  {% set args_csv = request.args.to_dict() %}{% set _ = args_csv.pop('pagina', None) %}
+  {% with tipo=none, alvo_id=none, extras=[("Baixar CSV", url_for('exportacao.contratos_csv', **args_csv))] %}{% include "_botao_seguir.html" %}{% endwith %}
+</div>
 
 {% if paginacao.items %}
 <div class="tabela-wrap">

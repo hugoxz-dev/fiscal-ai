@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends layout|default("base.html") %}
 {% block titulo %}Contrato {{ c.numero_controle_pncp }}{% endblock %}
 {% block conteudo %}
 <p><a class="voltar" href="{{ url_for('contratos.lista') }}">Voltar para contratos</a></p>
@@ -9,6 +9,7 @@
     {% if c.nivel %}<span class="etiqueta nivel-{{ c.nivel }}">Risco {{ c.nivel|lower }}</span>{% endif %}
   </div>
 </div>
+{% with tipo=none, alvo_id=none, extras=[("Relatório para impressão", url_for('exportacao.relatorio', tipo='contrato', id=c.id))] %}{% include "_botao_seguir.html" %}{% endwith %}
 
 <dl class="dados">
   <div><dt>Fornecedor</dt><dd><a href="{{ url_for('fornecedores.detalhe', id=c.fornecedor.id) }}">{{ c.fornecedor.nome }}</a><br>{{ c.fornecedor.documento | cnpj }}</dd></div>

@@ -29,3 +29,16 @@ code.chave { display: block; padding: .6rem .8rem; background: var(--fundo); bor
 .plano .para-quem { color: var(--tinta-suave); margin: 0; }
 .plano .fita { position: absolute; top: -.8rem; right: 1.2rem; background: var(--coral); color: var(--branco); border-radius: 999px; padding: .15rem .75rem; font-weight: 700; font-size: .8rem; }
 .resumo-compra { background: var(--azul-claro); border-radius: 10px; padding: .6rem .9rem; }
+/* Relatórios para impressão: reaproveitam as fichas, sem navegação nem botões */
+body.relatorio { background: var(--branco); }
+.relatorio-topo { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; padding-block: 1rem; border-bottom: 3px solid var(--azul); margin-bottom: 1.5rem; }
+.relatorio-topo span { display: block; color: var(--tinta-suave); font-size: .9rem; }
+.relatorio-marca { font-family: var(--fonte-titulo); font-size: 1.4rem; color: var(--azul); }
+.relatorio-rodape { border-top: 1px solid var(--linha); margin-top: 2rem; padding-block: 1rem; font-size: .85rem; color: var(--tinta-suave); }
+body.relatorio .acoes-pro, body.relatorio .voltar, body.relatorio .enfeite { display: none !important; }
+@media print {
+  .nao-imprimir, .acoes-pro, .voltar { display: none !important; }
+  body.relatorio { font-size: 11pt; }
+  body.relatorio a { color: inherit; text-decoration: none; }
+  .tabela-wrap { overflow: visible !important; }
+}

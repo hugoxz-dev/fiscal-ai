@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Relatório · {% block titulo %}Fiscal AI{% endblock %}</title>
+  <link href="{{ url_for('static', filename='vendor/bootstrap.min.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='fiscal.css', v='2026-11-20a') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='conta.css', v='2026-11-20a') }}" rel="stylesheet">
+</head>
+<body class="relatorio">
+  <header class="relatorio-topo conteudo">
+    <div>
+      <strong class="relatorio-marca">Fiscal AI — Relatório</strong>
+      <span>Gerado em {{ gerado_em.strftime("%d/%m/%Y às %H:%M") }} · {{ request.host_url }}</span>
+    </div>
+    <button class="botao nao-imprimir" type="button" onclick="window.print()">Imprimir / salvar PDF</button>
+  </header>
+  <main class="conteudo">
+    {% block conteudo %}{% endblock %}
+  </main>
+  <footer class="relatorio-rodape conteudo">
+    <p><strong>Aviso:</strong> {{ AVISO }}</p>
+    <p><strong>Fontes:</strong> PNCP (pncp.gov.br), Diário Oficial de São Luís, Portal da Transparência (CEIS/CNEP, convênios, emendas),
+      BrasilAPI (Receita Federal), TSE (dados abertos), Câmara dos Deputados e Senado Federal (dados abertos).</p>
+  </footer>
+</body>
+</html>

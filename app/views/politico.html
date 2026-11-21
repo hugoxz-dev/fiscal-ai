@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends layout|default("base.html") %}
 {% from "_foto_politico.html" import foto_politico with context %}
 {% block titulo %}{{ nome_exibido }}{% endblock %}
 {% macro tabela_doadores(lista) %}
@@ -19,7 +19,7 @@
     <h1>{{ nome_exibido }}</h1>
     <p class="lead">{{ p.cargo }}{% if p.partido %} ({{ p.partido }}){% endif %}
       · {{ p.municipio or '' }}{{ '/' if p.municipio }}{{ p.uf }}{% if p.ano_eleicao %} · eleito {{ p.ano_eleicao }}{% endif %}</p>
-    {% with tipo="politico", alvo_id=p.id %}{% include "_botao_seguir.html" %}{% endwith %}
+    {% with tipo="politico", alvo_id=p.id, extras=[("Relatório para impressão", url_for('exportacao.relatorio', tipo='politico', id=p.id))] %}{% include "_botao_seguir.html" %}{% endwith %}
   </div>
 </div>
 

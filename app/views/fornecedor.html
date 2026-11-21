@@ -1,9 +1,9 @@
-{% extends "base.html" %}
+{% extends layout|default("base.html") %}
 {% block titulo %}{{ f.nome }}{% endblock %}
 {% block conteudo %}
 <p><a class="voltar" href="{{ url_for('contratos.lista') }}">Voltar para contratos</a></p>
 <h1>{{ f.nome }}</h1>
-{% with tipo="fornecedor", alvo_id=f.id %}{% include "_botao_seguir.html" %}{% endwith %}
+{% with tipo="fornecedor", alvo_id=f.id, extras=[("Relatório para impressão", url_for('exportacao.relatorio', tipo='fornecedor', id=f.id)), ("Baixar CSV dos alertas", url_for('exportacao.alertas_csv', id=f.id))] %}{% include "_botao_seguir.html" %}{% endwith %}
 
 <dl class="dados">
   <div><dt>{{ 'CPF' if f.tipo == 'PF' else 'CNPJ' }}</dt><dd>{{ f.documento | cnpj }}</dd></div>

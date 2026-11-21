@@ -87,6 +87,10 @@ def _agregar_doadores(doacoes):
 
 @bp.route("/politicos/<int:id>")
 def detalhe(id):
+    return render_template("politico.html", **contexto_detalhe(id))
+
+
+def contexto_detalhe(id: int) -> dict:
     p = db.session.get(Politico, id) or abort(404)
     ligs = ligacoes_do_politico(p)
     resumos = {l.fornecedor.id: resumo_fornecedor(l.fornecedor) for l in ligs}
@@ -96,8 +100,8 @@ def detalhe(id):
     cota: dict[str, Decimal] = defaultdict(Decimal)
     for d in p.despesas:
         cota[d.tipo or "Outros"] += d.valor or Decimal("0")
-    return render_template(
-        "politico.html", p=p, nome_exibido=_nome_exibido(p),
+    return dict(
+        p=p, nome_exibido=_nome_exibido(p),
         confirmadas=[l for l in ligs if l.confirmada], so_nome=[l for l in ligs if not l.confirmada],
         resumos=resumos, bens=bens, total_bens=sum((b.valor or 0 for b in bens), Decimal("0")),
         doadores=diretas[:50], total_doadores=sum((g["total"] for g in diretas), Decimal("0")),
