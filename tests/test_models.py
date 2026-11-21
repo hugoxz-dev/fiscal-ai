@@ -63,3 +63,41 @@ def test_socio_do_fornecedor(app):
     db.session.add(f)
     db.session.commit()
     assert f.socios[0].cpf_meio == "682847"
+
+
+def test_modelos_de_conta_persistem(app):
+    from datetime import date
+
+    from app.models import Assinatura, ChaveApi, PedidoInstitucional, Seguido, UsoApi, Usuario
+
+    u = Usuario(nome="Ana", email="ana@x.com", senha_hash="h")
+    u.assinaturas.append(Assinatura(plano="pro", periodo="mensal", valor=Decimal("19.90"), status="ativa",
+                                    inicio=date(2026, 1, 1), fim=date(2026, 1, 31)))
+    u.seguidos.append(Seguido(tipo="fornecedor", alvo_id=1))
+    chave = ChaveApi(prefixo="fai_abcd", chave_hash="0" * 64)
+    u.chaves.append(chave)
+    db.session.add_all([u, PedidoInstitucional(nome="B", orgao="Câmara", municipio="Paço", email="b@x.com",
+                                               mensagem="oi")])
+    db.session.commit()
+    db.session.add(UsoApi(chave_id=chave.id, dia=date(2026, 1, 1), chamadas=3))
+    db.session.commit()
+    u = Usuario.query.one()
+    assert u.assinaturas[0].valor == Decimal("19.90") and u.seguidos[0].alvo_id == 1
+    assert u.chaves[0].revogada_em is None and UsoApi.query.one().chamadas == 3
+    assert PedidoInstitucional.query.one().criado_em is not None
+
+
+def test_seguido_unico(app):
+    import pytest
+    from sqlalchemy.exc import IntegrityError
+
+    from app.models import Seguido, Usuario
+
+    u = Usuario(nome="Ana", email="ana@x.com", senha_hash="h")
+    db.session.add(u)
+    db.session.commit()
+    db.session.add_all([Seguido(usuario_id=u.id, tipo="fornecedor", alvo_id=1),
+                        Seguido(usuario_id=u.id, tipo="fornecedor", alvo_id=1)])
+    with pytest.raises(IntegrityError):
+        db.session.commit()
+    db.session.rollback()

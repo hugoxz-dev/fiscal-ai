@@ -6,7 +6,7 @@ from app.extensions import db
 
 @pytest.fixture
 def app():
-    app = create_app({"TESTING": True, "SQLALCHEMY_DATABASE_URI": "sqlite:///:memory:"})
+    app = create_app({"TESTING": True, "SQLALCHEMY_DATABASE_URI": "sqlite:///:memory:", "CSRF_ATIVO": False})
     with app.app_context():
         db.create_all()
         yield app
@@ -53,3 +53,34 @@ def ctx_vazio():
     from app.services.regras.base import Contexto
 
     return Contexto(contratos=[], sancoes={}, llm=None)
+
+
+@pytest.fixture
+def fazer_usuario(app):
+    """Fábrica de usuários; com `plano`, cria assinatura ativa (fim padrão: hoje + 30)."""
+    from datetime import date, timedelta
+    from decimal import Decimal
+
+    from werkzeug.security import generate_password_hash
+
+    from app.models import Assinatura, Usuario
+
+    def fazer(email="ana@x.com", senha="segredo123", plano=None, fim=None, nome="Ana"):
+        u = Usuario(nome=nome, email=email, senha_hash=generate_password_hash(senha))
+        if plano:
+            u.assinaturas.append(Assinatura(plano=plano, periodo="mensal", valor=Decimal("19.90"), status="ativa",
+                                            inicio=date.today(), fim=fim or date.today() + timedelta(days=30)))
+        db.session.add(u)
+        db.session.commit()
+        return u
+
+    return fazer
+
+
+@pytest.fixture
+def logar():
+    def entrar(client, usuario):
+        with client.session_transaction() as s:
+            s["usuario_id"] = usuario.id
+
+    return entrar

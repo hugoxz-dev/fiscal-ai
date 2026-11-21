@@ -1,6 +1,7 @@
 from .aditivo import Aditivo
 from .alerta import Alerta
 from .coleta_log import ColetaLog
+from .conta import Assinatura, ChaveApi, PedidoInstitucional, Seguido, UsoApi, Usuario
 from .contratacao import Contratacao
 from .contrato import Contrato
 from .convenio import Convenio
@@ -14,4 +15,5 @@ from .socio import Socio
 
 __all__ = ["Aditivo", "Alerta", "ColetaLog", "Contratacao", "Contrato", "Convenio",
            "ExtratoDiario", "PublicacaoDiario", "Fornecedor", "JulgamentoCnae", "Orgao", "Sancao",
-           "BemDeclarado", "DespesaParlamentar", "Doacao", "Emenda", "Politico", "Proposicao", "Socio"]
+           "BemDeclarado", "DespesaParlamentar", "Doacao", "Emenda", "Politico", "Proposicao", "Socio",
+           "Assinatura", "ChaveApi", "PedidoInstitucional", "Seguido", "UsoApi", "Usuario"]

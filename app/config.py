@@ -8,6 +8,8 @@ load_dotenv(BASE_DIR / ".env")
 
 
 class Config:
+    SECRET_KEY = os.getenv("SECRET_KEY", "dev-fiscal-ai")
+    CSRF_ATIVO = True
     SQLALCHEMY_DATABASE_URI = os.getenv(
         "DATABASE_URL", "mysql+pymysql://root:@localhost:3306/fiscal_ai?charset=utf8mb4"
     )
