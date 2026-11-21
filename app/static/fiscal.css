@@ -23,7 +23,8 @@
 body {
   background-color: var(--fundo);
   /* Textura: grade de pontinhos azuis, quase imperceptível */
-  background-image: radial-gradient(rgba(14, 53, 157, .16) 1.3px, transparent 1.6px);
+  /* SVG em vez de radial-gradient: o navegador rasteriza o ladrilho uma vez só e a rolagem não trava */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Ccircle cx='12' cy='12' r='1.45' fill='%230E359D' fill-opacity='.16'/%3E%3C/svg%3E");
   background-size: 24px 24px;
   color: var(--tinta);
   font-family: var(--fonte-texto);
