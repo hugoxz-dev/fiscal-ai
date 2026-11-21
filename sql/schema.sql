@@ -46,6 +46,17 @@ CREATE TABLE orgao (
 	UNIQUE (cnpj)
 );
 
+CREATE TABLE pedido_institucional (
+	id INTEGER NOT NULL AUTO_INCREMENT, 
+	nome VARCHAR(120) NOT NULL, 
+	orgao VARCHAR(190) NOT NULL, 
+	municipio VARCHAR(120) NOT NULL, 
+	email VARCHAR(190) NOT NULL, 
+	mensagem TEXT, 
+	criado_em DATETIME NOT NULL, 
+	PRIMARY KEY (id)
+);
+
 CREATE TABLE politico (
 	id INTEGER NOT NULL AUTO_INCREMENT, 
 	nome VARCHAR(255) NOT NULL, 
@@ -91,6 +102,30 @@ CREATE TABLE sancao (
 	UNIQUE (documento, cadastro, data_inicio)
 );
 
+CREATE TABLE usuario (
+	id INTEGER NOT NULL AUTO_INCREMENT, 
+	nome VARCHAR(120) NOT NULL, 
+	email VARCHAR(190) NOT NULL, 
+	senha_hash VARCHAR(255) NOT NULL, 
+	criado_em DATETIME NOT NULL, 
+	ultima_visita_monitoramento DATETIME, 
+	PRIMARY KEY (id), 
+	UNIQUE (email)
+);
+
+CREATE TABLE assinatura (
+	id INTEGER NOT NULL AUTO_INCREMENT, 
+	usuario_id INTEGER NOT NULL, 
+	plano VARCHAR(20) NOT NULL, 
+	periodo VARCHAR(10) NOT NULL, 
+	valor NUMERIC(15, 2) NOT NULL, 
+	status VARCHAR(10) NOT NULL, 
+	inicio DATE NOT NULL, 
+	fim DATE NOT NULL, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(usuario_id) REFERENCES usuario (id)
+);
+
 CREATE TABLE bem_declarado (
 	id INTEGER NOT NULL AUTO_INCREMENT, 
 	politico_id INTEGER NOT NULL, 
@@ -99,6 +134,18 @@ CREATE TABLE bem_declarado (
 	valor NUMERIC(15, 2), 
 	PRIMARY KEY (id), 
 	FOREIGN KEY(politico_id) REFERENCES politico (id)
+);
+
+CREATE TABLE chave_api (
+	id INTEGER NOT NULL AUTO_INCREMENT, 
+	usuario_id INTEGER NOT NULL, 
+	prefixo VARCHAR(8) NOT NULL, 
+	chave_hash VARCHAR(64) NOT NULL, 
+	criada_em DATETIME NOT NULL, 
+	revogada_em DATETIME, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(usuario_id) REFERENCES usuario (id), 
+	UNIQUE (chave_hash)
 );
 
 CREATE TABLE contratacao (
@@ -185,6 +232,17 @@ CREATE TABLE proposicao (
 	FOREIGN KEY(politico_id) REFERENCES politico (id)
 );
 
+CREATE TABLE seguido (
+	id INTEGER NOT NULL AUTO_INCREMENT, 
+	usuario_id INTEGER NOT NULL, 
+	tipo VARCHAR(12) NOT NULL, 
+	alvo_id INTEGER NOT NULL, 
+	criado_em DATETIME NOT NULL, 
+	PRIMARY KEY (id), 
+	CONSTRAINT uq_seguido UNIQUE (usuario_id, tipo, alvo_id), 
+	FOREIGN KEY(usuario_id) REFERENCES usuario (id)
+);
+
 CREATE TABLE socio (
 	id INTEGER NOT NULL AUTO_INCREMENT, 
 	fornecedor_id INTEGER NOT NULL, 
@@ -216,11 +274,22 @@ CREATE TABLE contrato (
 	nivel VARCHAR(10), 
 	explicacao TEXT, 
 	analisado_em DATETIME, 
+	coletado_em DATETIME NOT NULL, 
 	PRIMARY KEY (id), 
 	UNIQUE (numero_controle_pncp), 
 	FOREIGN KEY(contratacao_id) REFERENCES contratacao (id), 
 	FOREIGN KEY(orgao_id) REFERENCES orgao (id), 
 	FOREIGN KEY(fornecedor_id) REFERENCES fornecedor (id)
+);
+
+CREATE TABLE uso_api (
+	id INTEGER NOT NULL AUTO_INCREMENT, 
+	chave_id INTEGER NOT NULL, 
+	dia DATE NOT NULL, 
+	chamadas INTEGER NOT NULL, 
+	PRIMARY KEY (id), 
+	CONSTRAINT uq_uso_api_dia UNIQUE (chave_id, dia), 
+	FOREIGN KEY(chave_id) REFERENCES chave_api (id)
 );
 
 CREATE TABLE aditivo (

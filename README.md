@@ -40,6 +40,7 @@ copy .env.example .env            # e preencha TRANSPARENCIA_API_KEY
    ```
 3. Crie as tabelas: `flask init-db` (também grava o DDL em `sql/schema.sql`).
    Banco criado antes de 17/11/2026? Rode `sql/migracao_2026-11-17.sql` no Workbench e depois recolete `cnpj` e `pncp`.
+   Banco criado antes da monetização (20/11/2026)? Rode `sql/migracao_2026-11-20-monetizacao.sql` no Workbench e depois `flask init-db` (cria só as tabelas novas de contas).
 4. Ollama: instale em <https://ollama.com>, depois `ollama pull qwen2.5:7b`. O modelo cabe numa GPU de 6 GB.
 5. Chave do Portal da Transparência: cadastre-se em <https://portaldatransparencia.gov.br/api-de-dados/cadastrar-email> e coloque a chave em `TRANSPARENCIA_API_KEY` no `.env`.
 
@@ -52,6 +53,7 @@ copy .env.example .env            # e preencha TRANSPARENCIA_API_KEY
 | `TRANSPARENCIA_API_KEY` | vazio (sanções e convênios são pulados) |
 | `COLETA_INICIO` | `2025-01-01` |
 | `IBGE_MUNICIPIO` | `2111300` (São Luís) |
+| `SECRET_KEY` | `dev-fiscal-ai` (troque fora do computador de desenvolvimento: assina a sessão de login) |
 
 ## Como usar
 
@@ -111,21 +113,54 @@ flask validacao resumo validacao.csv           # precisão por regra, em tabela 
 
 A amostra é sorteada com semente fixa (`--semente 42`), então a mesma base gera sempre a mesma planilha. Para cada linha, abra o link do painel e da fonte (PNCP), confira a evidência e preencha a coluna **veredito** com `acerto`, `falso positivo` ou `inconclusivo` (ou só `a`, `f`, `i`); use **observacao** para justificar. Precisão = acertos / (acertos + falsos positivos). As planilhas `validacao*.csv` ficam fora do git.
 
+## Planos e modelo de negócio
+
+O painel continua **aberto e grátis, sem login**. A monetização vende conveniência para quem trabalha com os dados todo dia, nunca o acesso à informação pública, e não usa anúncios. A cobrança é **simulada** (modo demonstração): nenhum pagamento é feito e nenhum dado de cartão é guardado.
+
+| Plano | Para quem | Preço (demonstração) | O que tem |
+|---|---|---|---|
+| Cidadão | qualquer pessoa | grátis | todo o painel |
+| Pro | jornalistas, assessores, pesquisadores, ONGs | R$ 19,90/mês ou R$ 199/ano | seguir fornecedores e políticos com novidades desde a última visita, exportação CSV, relatórios para impressão, API (1.000 chamadas/dia) |
+| Institucional | câmaras, redações, controle interno, outras prefeituras | sob consulta (a partir de R$ 490/mês por município) | o Fiscal AI instalado para outro município (`IBGE_MUNICIPIO`), tudo do Pro e API sem limite |
+
+Páginas: `/planos` (planos, checkout de demonstração e formulário institucional), `/conta` (plano, cancelamento e chave de API), `/conta/monitoramento` (novidades) e `/api` (documentação da API).
+
+```bash
+flask negocio demo                 # contas fictícias @demo.fiscal-ai.local e a conta da banca (imprime a senha)
+flask negocio demo --limpar        # remove só as contas fictícias
+flask negocio resumo               # contas, assinantes, MRR simulado, uso da API, pedidos institucionais
+flask negocio institucional --email fulano@camara.gov.br --meses 12
+flask leads                        # pedidos de demonstração do plano Institucional
+```
+
+`flask negocio demo` nunca cria contrato, alerta ou qualquer dado público. A conta da banca segue os 3 fornecedores com mais contratos com data de 90 dias atrás, então o "Meu painel" mostra como novidade os contratos e alertas reais desse período.
+
+A API usa o cabeçalho `X-API-Key`:
+
+```bash
+curl -H "X-API-Key: fai_..." "http://127.0.0.1:5000/api/v1/contratos?nivel=Alto"
+```
+
+Endpoints: `/api/v1/contratos` (mesmos filtros da página, paginado), `/api/v1/contratos/<id>`, `/api/v1/fornecedores/<id>` e `/api/v1/alertas`. CPF de fornecedor pessoa física sai mascarado, como no site.
+
 ## Arquitetura (MVC)
 
 ```
 app/
   models/        M — tabelas (SQLAlchemy): orgao, fornecedor, contratacao, contrato, aditivo,
                      publicacao_diario, extrato_diario, sancao, alerta, convenio, coleta_log,
-                     julgamento_cnae (cache das respostas do LLM)
+                     julgamento_cnae (cache das respostas do LLM), usuario, assinatura, seguido,
+                     chave_api, uso_api, pedido_institucional
   views/         V — templates Jinja2 (Bootstrap 5 + Chart.js) e filtros de formatação
-  controllers/   C — rotas Flask: painel, contratos, fornecedores, metodologia
+  controllers/   C — rotas Flask: painel, contratos, fornecedores, politicos, metodologia,
+                     contas, planos, monitoramento, exportacao, api
   services/
     coletores/   PNCP, Diário Oficial, Portal da Transparência, BrasilAPI
     regras/      uma classe por indicador de risco + config.py (pesos e limites)
     analisador.py   executa as regras, calcula score e nível
     llm.py          cliente do Ollama
-  cli.py         comandos flask init-db / coletar / analisar / explicar
+    contas.py, monitoramento.py, exportacao.py, api_chaves.py, negocio.py   plano Pro/Institucional
+  cli.py         comandos flask init-db / coletar / analisar / explicar / validacao / negocio / leads
 tests/           pytest (banco SQLite em memória, APIs e LLM simulados)
 sql/schema.sql   DDL para o Workbench / monografia
 ```
