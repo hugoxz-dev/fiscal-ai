@@ -5,7 +5,7 @@ from sqlalchemy import and_, or_
 
 from ..extensions import db
 from ..models import Contrato, Fornecedor, Orgao
-from ..services.analisador import REGRAS
+from ..services.analisador import TODAS_REGRAS
 from ..views._filtros import MODALIDADES
 
 bp = Blueprint("contratos", __name__)
@@ -67,7 +67,7 @@ def lista():
 
 def contexto_detalhe(id: int) -> dict:
     contrato = db.session.get(Contrato, id) or abort(404)
-    nomes = {r.codigo: r for r in REGRAS}
+    nomes = {r.codigo: r for r in TODAS_REGRAS}
     alertas = sorted(contrato.alertas, key=lambda al: -al.pontos)
     pdfs = sorted({e.publicacao.url_pdf: e.publicacao for e in contrato.extratos}.values(),
                   key=lambda p: p.data_edicao or date.min)

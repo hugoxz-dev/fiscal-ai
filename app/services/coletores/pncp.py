@@ -95,6 +95,11 @@ def parse_termo(item: dict) -> dict:
     return {
         "numero": str(item.get("numeroTermoContrato") or item.get("sequencialTermoContrato")),
         "valor_acrescimo": _dinheiro(acrescimo or 0),
+        "valor_global": _dinheiro(item.get("valorGlobal")),
+        # objeto e observação do termo, sem repetir quando são iguais (costumam declarar o % de acréscimo)
+        "descricao": "\n\n".join(dict.fromkeys(t.strip() for t in (item.get("objetoTermoContrato"),
+                                                                  item.get("informativoObservacao")) if t and t.strip()))
+                     or None,
         "data": _data(item.get("dataAssinatura")),
         "origem": "pncp",
     }
@@ -168,7 +173,8 @@ def upsert_aditivo(contrato: Contrato, d: dict) -> Aditivo:
     if a is None:
         a = Aditivo(numero=d["numero"], origem=d["origem"])
         contrato.aditivos.append(a)
-    a.valor_acrescimo, a.data = d["valor_acrescimo"], d["data"]
+    a.valor_acrescimo, a.valor_global, a.data = d["valor_acrescimo"], d.get("valor_global"), d["data"]
+    a.descricao = d.get("descricao")
     return a
 
 

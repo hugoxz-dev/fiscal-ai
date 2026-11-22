@@ -20,7 +20,18 @@ from .regras.sancionado import Sancionado
 from .regras.sobrepreco import Sobrepreco
 
 REGRAS: list[type[Regra]] = [DispensaLimite, Fracionamento, FornecedorNovo, CnaeIncompativel, Sancionado,
-                             Concentracao, CompeticaoBaixa, AditivosExcessivos, Sobrepreco]
+                             Concentracao, CompeticaoBaixa, AditivosExcessivos]
+
+# Regras que não rodam na análise, com o motivo (mostrado na Metodologia). O código e os testes continuam.
+REGRAS_DESATIVADAS: dict[type[Regra], str] = {
+    Sobrepreco: ("Desativada após a validação manual (0 acertos em 5). A regra comparava o valor total de contratos "
+                 "com objetos diferentes. Para comparar preço unitário, os itens precisariam de código de catálogo "
+                 "(CATMAT/CATSER), mas o PNCP de São Luís não o informa e as descrições dos itens são genéricas "
+                 "(\"seringa\", \"dreno cirúrgico\"), o que mistura produtos diferentes com o mesmo nome."),
+}
+
+# Todas as regras já existentes, para dar nome a alertas antigos e à planilha de validação.
+TODAS_REGRAS: list[type[Regra]] = REGRAS + list(REGRAS_DESATIVADAS)
 
 
 def nivel_para(score: int) -> str:

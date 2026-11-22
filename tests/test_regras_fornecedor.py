@@ -73,9 +73,44 @@ def test_cnae_compativel_nao_dispara(fazer_contrato):
     assert CnaeIncompativel(PESOS).avaliar(c, Contexto([], {}, LLMFalso((True, "ok")))) is None
 
 
-def _sancao(inicio, fim):
-    return Sancao(documento="11222333000144", cadastro="CEIS", data_inicio=inicio, data_fim=fim,
-                  orgao_sancionador="TCE-MA", descricao="Impedimento")
+INIDONEIDADE = "Declaração de Inidoneidade com prazo determinado"
+IMPEDIMENTO = "Impedimento/proibição de contratar com prazo determinado"
+
+
+def _sancao(inicio, fim, descricao=INIDONEIDADE, orgao="TCE-MA", cadastro="CEIS"):
+    return Sancao(documento="11222333000144", cadastro=cadastro, data_inicio=inicio, data_fim=fim,
+                  orgao_sancionador=orgao, descricao=descricao)
+
+
+def _avaliar_sancao(fazer_contrato, sancao):
+    c = fazer_contrato(fornecedor=_pj(), data_assinatura=date(2025, 5, 1))
+    return Sancionado(PESOS).avaliar(c, Contexto([], {"11222333000144": [sancao]}, None))
+
+
+# Validação de 2026-11-22: impedimento e suspensão só valem no ente que os aplicou (Lei 14.133, art. 156,
+# §4º); multa não proíbe contratar. Só a inidoneidade (§5º) vale para qualquer ente.
+def test_impedimento_de_outro_ente_nao_dispara(fazer_contrato):
+    s = _sancao(date(2024, 1, 1), None, IMPEDIMENTO, "Câmara Municipal de Cianorte (PR)")
+    assert _avaliar_sancao(fazer_contrato, s) is None
+
+
+def test_suspensao_de_outro_ente_nao_dispara(fazer_contrato):
+    assert _avaliar_sancao(fazer_contrato, _sancao(date(2024, 1, 1), None, "Suspensão", "JUSTICA ELEITORAL")) is None
+
+
+def test_multa_do_cnep_nao_dispara(fazer_contrato):
+    s = _sancao(date(2024, 1, 1), None, "Multa", "Prefeitura Municipal de Monte Carmelo (MG)", cadastro="CNEP")
+    assert _avaliar_sancao(fazer_contrato, s) is None
+
+
+def test_impedimento_aplicado_por_sao_luis_dispara(fazer_contrato):
+    s = _sancao(date(2024, 1, 1), None, IMPEDIMENTO, "PREFEITURA MUNICIPAL DE SÃO LUÍS - MA")
+    assert _avaliar_sancao(fazer_contrato, s) is not None
+
+
+def test_impedimento_de_homonimo_de_sao_luis_nao_dispara(fazer_contrato):
+    s = _sancao(date(2024, 1, 1), None, IMPEDIMENTO, "Prefeitura Municipal de São Luís de Montes Belos (GO)")
+    assert _avaliar_sancao(fazer_contrato, s) is None
 
 
 def test_sancao_vigente_dispara(fazer_contrato):

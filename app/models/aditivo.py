@@ -9,6 +9,8 @@ class Aditivo(db.Model):
     contrato_id = db.Column(db.Integer, db.ForeignKey("contrato.id"), nullable=False)
     numero = db.Column(db.String(30), nullable=False)
     valor_acrescimo = db.Column(Dinheiro, nullable=False, default=0)
+    valor_global = db.Column(Dinheiro)  # valor do contrato após o termo, como informado no PNCP
+    descricao = db.Column(db.Text)  # objeto e observação do termo (costumam declarar o % de acréscimo)
     data = db.Column(db.Date)
     origem = db.Column(db.String(10), nullable=False)
 

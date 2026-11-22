@@ -20,7 +20,7 @@
 {% else %}
   <h1 class="display">{{ kpis.contratos }} contratos.
     {% if atencao %}<span class="moldura">{{ atencao }}</span> pedem um olhar de perto.{% else %}Nenhum pede atenção agora.{% endif %}</h1>
-  <p class="lead">Cada contrato da Prefeitura de São Luís publicado no PNCP passa por nove verificações baseadas na Lei 14.133/2021. Quanto maior o score, mais indícios foram encontrados.</p>
+  <p class="lead">Cada contrato da Prefeitura de São Luís publicado no PNCP passa por oito verificações baseadas na Lei 14.133/2021. Quanto maior o score, mais indícios foram encontrados.</p>
   {% if kpis.alto %}
   <div class="acoes">
     <a class="botao" href="{{ url_for('contratos.lista', nivel='Alto') }}">Ver contratos de risco alto</a>

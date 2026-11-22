@@ -120,3 +120,58 @@ def test_dispensa_2024_usa_limite_de_2024(fazer_contrato, ctx_vazio):
     c = fazer_contrato(modalidade_id=8, valor_global=Decimal("61000"), data_assinatura=date(2024, 6, 1))
     r = DispensaLimite(PESOS).avaliar(c, ctx_vazio)
     assert r is not None and r.evidencia["limite"] == "59906.02"
+
+
+def test_dispensa_inciso_i_usa_limite_de_obras_mesmo_sem_palavra_chave(fazer_contrato, ctx_vazio):
+    # Validação de 2026-11-22: manutenção com amparo no art. 75, I era comparada ao limite geral.
+    c = _com_amparo(fazer_contrato, "Lei 14.133/2021, Art. 75, I", modalidade_id=8, valor_global=Decimal("124200"),
+                    objeto="Manutenção preventiva e corretiva do sistema de climatização")
+    assert DispensaLimite(PESOS).avaliar(c, ctx_vazio) is None
+
+
+def test_dispensa_inciso_i_acima_do_limite_de_obras_dispara(fazer_contrato, ctx_vazio):
+    c = _com_amparo(fazer_contrato, "Lei 14.133/2021, Art. 75, I", modalidade_id=8, valor_global=Decimal("130000"),
+                    objeto="Manutenção de veículos")
+    r = DispensaLimite(PESOS).avaliar(c, ctx_vazio)
+    assert r is not None and r.evidencia["categoria"] == "obras" and r.evidencia["limite"] == "125451.15"
+
+
+def test_dispensa_inciso_ii_usa_limite_geral_mesmo_com_palavra_de_obra(fazer_contrato, ctx_vazio):
+    c = _com_amparo(fazer_contrato, "Lei 14.133/2021, Art. 75, II", modalidade_id=8, valor_global=Decimal("70000"),
+                    objeto="Aquisição de material de construção")
+    r = DispensaLimite(PESOS).avaliar(c, ctx_vazio)
+    assert r is not None and r.evidencia["categoria"] == "geral"
+
+
+def test_dispensa_2023_usa_limite_de_2023(fazer_contrato, ctx_vazio):
+    # Decreto 11.317/2022: R$ 114.416,65 (I) e R$ 57.208,33 (II).
+    c = fazer_contrato(modalidade_id=8, valor_global=Decimal("58000"), data_assinatura=date(2023, 6, 1))
+    r = DispensaLimite(PESOS).avaliar(c, ctx_vazio)
+    assert r is not None and r.evidencia["limite"] == "57208.33"
+
+
+def test_fracionamento_objetos_de_naturezas_diferentes_nao_dispara(fazer_contrato):
+    # Validação de 2026-11-22: a regra somava água mineral, brinquedos e algemas do mesmo fornecedor.
+    for objeto in ("Fornecimento de água mineral", "Fornecimento de brinquedos novos e diversos",
+                   "Aquisição de 250 unidades de algemas para a guarda municipal"):
+        fazer_contrato(modalidade_id=8, valor_global=Decimal("25000"), objeto=objeto)
+    ctx = _ctx()
+    assert all(Fracionamento(PESOS).avaliar(c, ctx) is None for c in ctx.contratos)
+
+
+def test_fracionamento_soma_so_os_objetos_semelhantes(fazer_contrato):
+    a = fazer_contrato(modalidade_id=8, valor_global=Decimal("35000"), objeto="Fornecimento de material de expediente")
+    b = fazer_contrato(modalidade_id=8, valor_global=Decimal("35000"), objeto="Fornecimento de material de expediente",
+                       data_assinatura=date(2025, 8, 1))
+    outro = fazer_contrato(modalidade_id=8, valor_global=Decimal("20000"), objeto="Serviço de dedetização predial")
+    ctx = _ctx()
+    r = Fracionamento(PESOS).avaliar(a, ctx)
+    assert r is not None and sorted(r.evidencia["contratos"]) == sorted([a.id, b.id])
+    assert Fracionamento(PESOS).avaliar(outro, ctx) is None
+
+
+def test_fracionamento_nao_soma_contrato_publicado_em_duplicidade(fazer_contrato):
+    # Validação de 2026-11-22: o mesmo contrato aparece duas vezes no PNCP (ids 829 e 1091).
+    a = fazer_contrato(modalidade_id=8, valor_global=Decimal("40000"), objeto="Inspeção com drone do painel de azulejos")
+    fazer_contrato(modalidade_id=8, valor_global=Decimal("40000"), objeto="Inspeção com drone do painel de azulejos.")
+    assert Fracionamento(PESOS).avaliar(a, _ctx()) is None

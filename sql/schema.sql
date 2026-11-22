@@ -297,6 +297,8 @@ CREATE TABLE aditivo (
 	contrato_id INTEGER NOT NULL, 
 	numero VARCHAR(30) NOT NULL, 
 	valor_acrescimo NUMERIC(15, 2) NOT NULL, 
+	valor_global NUMERIC(15, 2), 
+	descricao TEXT, 
 	data DATE, 
 	origem VARCHAR(10) NOT NULL, 
 	PRIMARY KEY (id), 

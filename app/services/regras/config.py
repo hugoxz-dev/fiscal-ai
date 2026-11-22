@@ -2,8 +2,10 @@
 from decimal import Decimal
 
 # Lei 14.133/2021, art. 75, I (obras/serviços de engenharia) e II (demais compras/serviços).
-# 2024: Decreto 11.871/2023; 2025: Decreto 12.343/2024 — conferir o decreto vigente antes de cada ano.
+# 2023: Decreto 11.317/2022; 2024: Decreto 11.871/2023; 2025: Decreto 12.343/2024 — conferir o decreto
+# vigente antes de cada ano.
 LIMITES_DISPENSA = {
+    2023: {"obras": Decimal("114416.65"), "geral": Decimal("57208.33")},
     2024: {"obras": Decimal("119812.02"), "geral": Decimal("59906.02")},
     2025: {"obras": Decimal("125451.15"), "geral": Decimal("62725.59")},
 }
@@ -13,7 +15,9 @@ PESOS = {"dispensa_limite": 25, "fracionamento": 20, "fornecedor_novo": 20, "cna
 
 PARAMS = {"meses_fornecedor_novo": 6, "capital_min_pct": 0.10, "concentracao_pct": 0.30,
           "concentracao_min_contratos": 3, "aditivo_max_pct": 0.25, "sobrepreco_fator": 2.0,
-          "sobrepreco_min_pares": 5, "sobrepreco_similaridade": 0.30}
+          "sobrepreco_min_pares": 5, "sobrepreco_similaridade": 0.30,
+          "fracionamento_similaridade": 0.30,
+          "valor_erro_fator": 100, "ano_cobertura_min": 0.5}
 
 NIVEIS = [(60, "Alto"), (30, "Médio"), (0, "Baixo")]
 

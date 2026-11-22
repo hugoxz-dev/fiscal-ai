@@ -1,6 +1,6 @@
 # Fiscal AI
 
-Vigilância de gastos públicos da **Prefeitura de São Luís/MA**. O sistema coleta licitações, contratos e aditivos do PNCP, extratos do Diário Oficial do Município, sanções e convênios do Portal da Transparência e dados de CNPJ da Receita Federal. Depois aplica **nove verificações de risco** baseadas na Lei 14.133/2021 e mostra um painel público com ranking, evidências e links para as fontes.
+Vigilância de gastos públicos da **Prefeitura de São Luís/MA**. O sistema coleta licitações, contratos e aditivos do PNCP, extratos do Diário Oficial do Município, sanções e convênios do Portal da Transparência e dados de CNPJ da Receita Federal. Depois aplica **oito verificações de risco** baseadas na Lei 14.133/2021 e mostra um painel público com ranking, evidências e links para as fontes.
 
 A inteligência artificial (um modelo de linguagem **local**, via Ollama) **não decide** se há irregularidade. Ela só:
 1. organiza os dados dos extratos do Diário Oficial;
@@ -64,7 +64,7 @@ flask coletar --fonte cnpj                                     # abertura, capit
 flask coletar --fonte sancoes                                  # CEIS/CNEP (precisa da chave)
 flask coletar --fonte convenios --de 2025-01-01 --ate 2025-03-31
 flask coletar --fonte diario --de 2025-01-01 --ate 2025-03-31  # PDFs do Diário + extração via LLM
-flask analisar                                                 # aplica as 9 regras e calcula o score
+flask analisar                                                 # aplica as 8 regras e calcula o score
 flask explicar --limite 30                                     # explicações em português (Ollama)
 flask run                                                      # http://127.0.0.1:5000
 ```
@@ -177,11 +177,12 @@ sql/schema.sql   DDL para o Workbench / monografia
 | Possível fracionamento de despesa | 20 | art. 75, §1º |
 | Fornecedor recém-criado ou com capital baixo | 20 | art. 69 |
 | Atividade (CNAE) incompatível com o objeto (LLM) | 10 | art. 67 |
-| Fornecedor com sanção vigente (CEIS/CNEP) | 30 | art. 156; Lei 12.846/2013 |
+| Fornecedor com sanção vigente que impede contratar (CEIS/CNEP) | 30 | art. 156, §§ 4º e 5º; Lei 12.846/2013 |
 | Concentração de contratos em um fornecedor | 15 | art. 5º |
 | Baixa competição na licitação (aproximação) | 15 | art. 5º e 11 |
 | Aditivos acima de 25% | 20 | art. 125 |
-| Valor fora do padrão (TF-IDF + mediana) | 20 | art. 23 |
+
+A regra **valor fora do padrão** (TF-IDF + mediana, art. 23) existe no código, mas está desativada desde a validação manual: veja as limitações.
 
 Score = soma dos pontos, até 100. **Baixo** < 30 ≤ **Médio** < 60 ≤ **Alto**. Pesos, limites e parâmetros ficam em `app/services/regras/config.py`. **Confira os limites de dispensa do decreto vigente** antes de cada ano.
 
@@ -198,7 +199,11 @@ pytest
 - Extratos do Diário Oficial nem sempre trazem o CNPJ. A ligação com o contrato usa o nome do fornecedor e o valor (±1%).
 - Extratos de **aditivo** do Diário são guardados, mas não entram na regra de aditivos: o valor publicado costuma ser o global, não o acréscimo, e o contrato aditado nem sempre é identificável. A regra usa só os termos aditivos do PNCP.
 - Dispensas por emergência e outros incisos do art. 75 sem teto de valor não entram nas regras de dispensa e fracionamento (o fundamento vem do campo `amparoLegal` do PNCP).
-- O valor fora do padrão compara pessoa jurídica com pessoa jurídica e pessoa física com pessoa física (cotas individuais de agricultores do PNAE não servem de parâmetro para associações). Compras da agricultura familiar (PNAE) ficam fora dessa regra, porque o preço é fixado na chamada pública e o valor total mede só a cota.
+- **Valor fora do padrão (desativada).** Na validação manual, teve 0 acertos em 5: comparava o valor total de contratos com objetos diferentes. Comparar preço unitário exigiria código de catálogo (CATMAT/CATSER) nos itens, mas o PNCP de São Luís não o informa e as descrições são genéricas ("seringa", "dreno cirúrgico"). Trabalho futuro: cruzar com o Painel de Preços do Governo Federal.
+- **Sanções:** só contam a declaração de inidoneidade (vale para todos os entes) e o impedimento ou a suspensão aplicados pelo próprio Município. Impedimentos de outros entes (art. 156, §4º) e multas aparecem só na ficha do fornecedor.
+- **Aditivos:** a Prefeitura costuma informar no campo "valor acrescido" do termo o novo valor global do contrato. Quando os dois coincidem, a regra conta só a diferença para o valor anterior. Supressões não compensam acréscimos.
+- **Fracionamento:** soma só dispensas do mesmo fornecedor com objeto da mesma natureza (similaridade TF-IDF ≥ 0,30). A lei manda somar por unidade gestora, mas a coleta ainda não guarda a secretaria (trabalho futuro).
+- **Qualidade dos dados:** contratos publicados em duplicidade contam uma vez; um valor igual ao de outro contrato do mesmo fornecedor e objeto com as casas decimais deslocadas (ex.: R$ 1,5 milhão publicado como R$ 1,5 bilhão) fica fora da concentração; e a concentração só considera anos com coleta completa.
 - O CNPJ/CPF não aparece em URLs; CPFs são mascarados e não podem ser buscados.
 - Capital social 0 (associações e cooperativas, comuns na merenda escolar) é tratado como não informado.
 - A compatibilidade entre CNAE e objeto é um julgamento do modelo de linguagem e pode errar. O modelo recebe o CNAE principal e os secundários; associações e cooperativas não são avaliadas. Os julgamentos ficam guardados, então `flask analisar` sem o Ollama dá o mesmo resultado.

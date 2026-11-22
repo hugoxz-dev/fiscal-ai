@@ -88,8 +88,10 @@ def test_upsert_contrato_vincula_contratacao_existente(app, fixture_contratos):
 
 def test_parse_termo_aditivo():
     d = parse_termo(carregar("pncp_termos.json")[0])
-    assert d == {"numero": "13/2024", "valor_acrescimo": Decimal("3596.84"),
+    descricao = d.pop("descricao")
+    assert d == {"numero": "13/2024", "valor_acrescimo": Decimal("3596.84"), "valor_global": Decimal("3596.84"),
                  "data": date(2024, 11, 8), "origem": "pncp"}
+    assert descricao.startswith("A presente contrata") and descricao.count("A presente contrata") == 1  # sem repetir
 
 
 def test_upsert_aditivo_nao_duplica(app, fixture_contratos):

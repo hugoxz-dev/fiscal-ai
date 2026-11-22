@@ -42,8 +42,9 @@ def test_inicio_banco_vazio(client):
     assert "Nenhum contrato analisado ainda" in resp.get_data(as_text=True)
 
 
-def test_metodologia_lista_9_regras(client):
+def test_metodologia_lista_8_regras_e_a_desativada(client):
     html = client.get("/metodologia").get_data(as_text=True)
-    assert html.count('class="regra"') == 9
+    assert html.count('class="regra"') == 8
+    assert 'class="regra desativada"' in html and "Valor fora do padrão" in html and "catálogo" in html
     assert "Lei 14.133/2021, art. 75" in html
     assert AVISO in html

@@ -15,13 +15,13 @@ from pathlib import Path
 
 from ..models import Alerta
 from ..views._filtros import ROTULOS_EVIDENCIA, cnpj, data_br, evidencia_valor, moeda
-from .analisador import REGRAS
+from .analisador import TODAS_REGRAS
 
 COLUNAS = ["alerta_id", "regra", "nome_regra", "contrato_id", "score", "objeto", "fornecedor", "valor",
            "assinatura", "evidencias", "painel", "fonte", "veredito", "observacao"]
 VEREDITOS = {"a": "acerto", "f": "falso positivo", "i": "inconclusivo"}
-NOMES = {cls.codigo: cls.nome for cls in REGRAS}
-ORDEM = {cls.codigo: i for i, cls in enumerate(REGRAS)}
+NOMES = {cls.codigo: cls.nome for cls in TODAS_REGRAS}
+ORDEM = {cls.codigo: i for i, cls in enumerate(TODAS_REGRAS)}
 
 
 class ErroValidacao(ValueError):

@@ -13,7 +13,7 @@ def base(fazer_contrato):
     nova = Fornecedor(documento="11222333000144", nome="CONSTRUTORA NOVA LTDA", tipo="PJ",
                       data_abertura=date(2025, 3, 1), capital_social=Decimal("1000"))
     db.session.add(Sancao(documento="11222333000144", cadastro="CEIS", data_inicio=date(2024, 1, 1),
-                          orgao_sancionador="TCE-MA", descricao="Impedimento"))
+                          orgao_sancionador="TCE-MA", descricao="Declaração de Inidoneidade"))
     alto = fazer_contrato(fornecedor=nova, modalidade_id=8, valor_global=Decimal("90000"),
                           objeto="Reparo de telhado", link_pncp="https://pncp.gov.br/app/contratos/x/2025/1")
     baixo = fazer_contrato(valor_global=Decimal("5000"), objeto="Compra de papel A4")

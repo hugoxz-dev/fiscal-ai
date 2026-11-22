@@ -13,7 +13,8 @@ from app.services.analisador import REGRAS, analisar_todos, explicar_pendentes, 
 def cenario(fazer_contrato):
     nova = Fornecedor(documento="11222333000144", nome="NOVA LTDA", tipo="PJ",
                       data_abertura=date(2025, 3, 1), capital_social=Decimal("1000"))
-    db.session.add(Sancao(documento="11222333000144", cadastro="CEIS", data_inicio=date(2024, 1, 1)))
+    db.session.add(Sancao(documento="11222333000144", cadastro="CEIS", data_inicio=date(2024, 1, 1),
+                          descricao="Declaração de Inidoneidade com prazo determinado"))
     ruim = fazer_contrato(fornecedor=nova, modalidade_id=8, valor_global=Decimal("90000"),
                           data_assinatura=date(2025, 5, 1))
     limpo = fazer_contrato(valor_global=Decimal("5000"))
@@ -38,7 +39,16 @@ class LLMFalso:
 
 def test_regras_registradas():
     assert [r.codigo for r in REGRAS] == ["dispensa_limite", "fracionamento", "fornecedor_novo", "cnae",
-                                          "sancionado", "concentracao", "competicao", "aditivos", "sobrepreco"]
+                                          "sancionado", "concentracao", "competicao", "aditivos"]
+
+
+def test_sobrepreco_fica_desativado_com_motivo():
+    # Validação de 2026-11-22: sem código de catálogo nos itens do PNCP, não há preço unitário comparável.
+    from app.services.analisador import REGRAS_DESATIVADAS, TODAS_REGRAS
+
+    assert [r.codigo for r in REGRAS_DESATIVADAS] == ["sobrepreco"]
+    assert "catálogo" in REGRAS_DESATIVADAS[next(iter(REGRAS_DESATIVADAS))]
+    assert [r.codigo for r in TODAS_REGRAS][-1] == "sobrepreco"
 
 
 def test_niveis():

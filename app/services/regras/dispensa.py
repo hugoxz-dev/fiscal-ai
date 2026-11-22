@@ -8,21 +8,31 @@ from .base import Contexto, Regra, Resultado, fmt
 from .config import LIMITES_DISPENSA, MODALIDADE_DISPENSA, PALAVRAS_OBRAS
 
 
-def limite_dispensa(contrato: Contrato) -> tuple[Decimal, str]:
-    """Limite de dispensa (art. 75) aplicável ao contrato e a categoria usada."""
-    ano = contrato.data_assinatura.year if contrato.data_assinatura else max(LIMITES_DISPENSA)
-    tabela = LIMITES_DISPENSA.get(ano) or LIMITES_DISPENSA[max(LIMITES_DISPENSA)]
-    objeto = (contrato.objeto or "").lower()
-    categoria = "obras" if any(p in objeto for p in PALAVRAS_OBRAS) else "geral"
-    return tabela[categoria], categoria
-
-
 # Dispensas por valor: art. 75, I e II (Lei 14.133) ou art. 24, I e II (Lei 8.666, contratos antigos).
 _INCISO = re.compile(r"art\.?\s*(75|24)\s*,?\s*(?:inciso\s*)?([IVXL]+)\b", re.IGNORECASE)
 
 
 def amparo_legal(contrato: Contrato) -> str | None:
     return contrato.contratacao.amparo_legal if contrato.contratacao else None
+
+
+def _inciso(contrato: Contrato) -> str | None:
+    m = _INCISO.search(amparo_legal(contrato) or "")
+    return m.group(2).upper() if m else None
+
+
+def limite_dispensa(contrato: Contrato) -> tuple[Decimal, str]:
+    """Limite de dispensa (art. 75) aplicável ao contrato e a categoria usada. O inciso do amparo legal
+    decide a categoria (I = obras, engenharia e manutenção de veículos; II = demais); sem ele, o objeto."""
+    ano = contrato.data_assinatura.year if contrato.data_assinatura else max(LIMITES_DISPENSA)
+    tabela = LIMITES_DISPENSA.get(ano) or LIMITES_DISPENSA[max(LIMITES_DISPENSA)]
+    inciso = _inciso(contrato)
+    if inciso in ("I", "II"):
+        categoria = "obras" if inciso == "I" else "geral"
+    else:
+        objeto = (contrato.objeto or "").lower()
+        categoria = "obras" if any(p in objeto for p in PALAVRAS_OBRAS) else "geral"
+    return tabela[categoria], categoria
 
 
 def dispensa_por_valor(contrato: Contrato) -> bool:
@@ -33,8 +43,7 @@ def dispensa_por_valor(contrato: Contrato) -> bool:
     amparo = amparo_legal(contrato)
     if not amparo:
         return True
-    m = _INCISO.search(amparo)
-    return m is not None and m.group(2).upper() in ("I", "II")
+    return _inciso(contrato) in ("I", "II")
 
 
 class DispensaLimite(Regra):
