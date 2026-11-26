@@ -1,4 +1,14 @@
 [
-  {"codigoMateria": 9001, "identificacao": "PL 896/2023", "ementa": "Altera a lei X.", "dataApresentacao": "2026-03-10"},
-  {"codigoMateria": 9002, "identificacao": "PL 100/2019", "ementa": "Projeto antigo.", "dataApresentacao": "2019-02-05"}
+  {
+    "codigoMateria": 9001,
+    "identificacao": "PL 896/2023",
+    "ementa": "Altera a lei X.",
+    "dataApresentacao": "2026-03-10"
+  },
+  {
+    "codigoMateria": 9002,
+    "identificacao": "PL 100/2019",
+    "ementa": "Projeto antigo.",
+    "dataApresentacao": "2019-02-05"
+  }
 ]

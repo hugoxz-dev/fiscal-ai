@@ -1,11 +1,35 @@
 [
-  {"codigoEmenda": "202571000001", "ano": 2025, "tipoEmenda": "Emenda Individual - Transferências com Finalidade Definida",
-   "nomeAutor": "DUDA DO MARANHÃO", "localidadeDoGasto": "SÃO LUÍS - MA", "funcao": "Saúde",
-   "subfuncao": "Assistência hospitalar e ambulatorial", "valorEmpenhado": "893.200,00", "valorPago": "400.000,50"},
-  {"codigoEmenda": "202571000002", "ano": 2025, "tipoEmenda": "Emenda Individual - Transferências Especiais",
-   "nomeAutor": "DUDA DO MARANHÃO", "localidadeDoGasto": "MARANHÃO (UF)", "funcao": "Urbanismo",
-   "subfuncao": "Infraestrutura urbana", "valorEmpenhado": "100.000,00", "valorPago": "0,00"},
-  {"codigoEmenda": "202571000003", "ano": 2025, "tipoEmenda": "Emenda Individual - Transferências Especiais",
-   "nomeAutor": "OUTRA PESSOA", "localidadeDoGasto": "SÃO LUÍS - MA", "funcao": "Educação",
-   "subfuncao": "Ensino fundamental", "valorEmpenhado": "50.000,00", "valorPago": "50.000,00"}
+  {
+    "codigoEmenda": "202571000001",
+    "ano": 2025,
+    "tipoEmenda": "Emenda Individual - Transferências com Finalidade Definida",
+    "nomeAutor": "DUDA DO MARANHÃO",
+    "localidadeDoGasto": "SÃO LUÍS - MA",
+    "funcao": "Saúde",
+    "subfuncao": "Assistência hospitalar e ambulatorial",
+    "valorEmpenhado": "893.200,00",
+    "valorPago": "400.000,50"
+  },
+  {
+    "codigoEmenda": "202571000002",
+    "ano": 2025,
+    "tipoEmenda": "Emenda Individual - Transferências Especiais",
+    "nomeAutor": "DUDA DO MARANHÃO",
+    "localidadeDoGasto": "MARANHÃO (UF)",
+    "funcao": "Urbanismo",
+    "subfuncao": "Infraestrutura urbana",
+    "valorEmpenhado": "100.000,00",
+    "valorPago": "0,00"
+  },
+  {
+    "codigoEmenda": "202571000003",
+    "ano": 2025,
+    "tipoEmenda": "Emenda Individual - Transferências Especiais",
+    "nomeAutor": "OUTRA PESSOA",
+    "localidadeDoGasto": "SÃO LUÍS - MA",
+    "funcao": "Educação",
+    "subfuncao": "Ensino fundamental",
+    "valorEmpenhado": "50.000,00",
+    "valorPago": "50.000,00"
+  }
 ]

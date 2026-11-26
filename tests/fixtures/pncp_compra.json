@@ -1,1 +1,56 @@
-{"valorTotalEstimado":7735417.60,"valorTotalHomologado":5455750.00,"orcamentoSigilosoCodigo":1,"orcamentoSigilosoDescricao":"Compra sem sigilo","numeroControlePNCP":"06307102000130-1-000132/2024","linkSistemaOrigem":"https://cnetmobile.estaleiro.serpro.gov.br/comprasnet-web/public/landing?destino=acompanhamento-compra&compra=98092105900062024","linkProcessoEletronico":null,"anoCompra":2024,"sequencialCompra":132,"numeroCompra":"90006","processo":"11109.000083/2024","orgaoEntidade":{"cnpj":"06307102000130","razaoSocial":"MUNICIPIO DE SAO LUIS","poderId":"N","esferaId":"M"},"unidadeOrgao":{"ufNome":"Maranhão","ufSigla":"MA","municipioNome":"São Luís","codigoIbge":"2111300","codigoUnidade":"980921","nomeUnidade":"PREFEITURA MUNICIPAL DE SÃO LUÍS - MA"},"orgaoSubRogado":null,"unidadeSubRogada":null,"modalidadeId":6,"modalidadeNome":"Pregão - Eletrônico","justificativaPresencial":null,"modoDisputaId":1,"modoDisputaNome":"Aberto","tipoInstrumentoConvocatorioCodigo":1,"tipoInstrumentoConvocatorioNome":"Edital","amparoLegal":{"nome":"Lei 14.133/2021, Art. 28, I","descricao":"pregão: modalidade de licitação obrigatória para aquisição de bens e serviços comuns","codigo":1},"objetoCompra":"Contratação de Empresa Especializada na prestação de mão de obra terceirizada de apoio administrativo com regime de dedicação exclusiva de mão de obra, para atender as necessidades da Secretaria Municipal da Fazenda –SEMFAZ/São Luís - MA, conforme as especificações, condições e exigências estabelecidas neste instrumento e seus anexos","informacaoComplementar":"Em caso de divergência entre as informações constantes no Cadastro do Comprasnet, prevalecerá as especificações registradas no Edital e seus anexos. Para as respostas de esclarecimentos e impugnações deste edital acesse o link: https://cnetmobile.estaleiro.serpro.gov.br/comprasnet-web/public/landing?destino=quadro-informativo&compra=98092105900062024","srp":false,"fontesOrcamentarias":[],"emendaParlamentar":null,"dataPublicacaoPncp":"2024-09-25T07:01:02","dataAberturaProposta":"2024-09-25T08:00:00","dataEncerramentoProposta":"2024-10-10T14:30:00","situacaoCompraId":1,"situacaoCompraNome":"Divulgada no PNCP","existeResultado":true,"dataInclusao":"2024-09-25T07:01:02","dataAtualizacao":"2024-09-25T07:01:02","dataAtualizacaoGlobal":"2025-01-17T09:52:55","usuarioNome":"Compras.gov.br"}
+{
+  "valorTotalEstimado": 7735417.6,
+  "valorTotalHomologado": 5455750.0,
+  "orcamentoSigilosoCodigo": 1,
+  "orcamentoSigilosoDescricao": "Compra sem sigilo",
+  "numeroControlePNCP": "06307102000130-1-000132/2024",
+  "linkSistemaOrigem": "https://cnetmobile.estaleiro.serpro.gov.br/comprasnet-web/public/landing?destino=acompanhamento-compra&compra=98092105900062024",
+  "linkProcessoEletronico": null,
+  "anoCompra": 2024,
+  "sequencialCompra": 132,
+  "numeroCompra": "90006",
+  "processo": "11109.000083/2024",
+  "orgaoEntidade": {
+    "cnpj": "06307102000130",
+    "razaoSocial": "MUNICIPIO DE SAO LUIS",
+    "poderId": "N",
+    "esferaId": "M"
+  },
+  "unidadeOrgao": {
+    "ufNome": "Maranhão",
+    "ufSigla": "MA",
+    "municipioNome": "São Luís",
+    "codigoIbge": "2111300",
+    "codigoUnidade": "980921",
+    "nomeUnidade": "PREFEITURA MUNICIPAL DE SÃO LUÍS - MA"
+  },
+  "orgaoSubRogado": null,
+  "unidadeSubRogada": null,
+  "modalidadeId": 6,
+  "modalidadeNome": "Pregão - Eletrônico",
+  "justificativaPresencial": null,
+  "modoDisputaId": 1,
+  "modoDisputaNome": "Aberto",
+  "tipoInstrumentoConvocatorioCodigo": 1,
+  "tipoInstrumentoConvocatorioNome": "Edital",
+  "amparoLegal": {
+    "nome": "Lei 14.133/2021, Art. 28, I",
+    "descricao": "pregão: modalidade de licitação obrigatória para aquisição de bens e serviços comuns",
+    "codigo": 1
+  },
+  "objetoCompra": "Contratação de Empresa Especializada na prestação de mão de obra terceirizada de apoio administrativo com regime de dedicação exclusiva de mão de obra, para atender as necessidades da Secretaria Municipal da Fazenda –SEMFAZ/São Luís - MA, conforme as especificações, condições e exigências estabelecidas neste instrumento e seus anexos",
+  "informacaoComplementar": "Em caso de divergência entre as informações constantes no Cadastro do Comprasnet, prevalecerá as especificações registradas no Edital e seus anexos. Para as respostas de esclarecimentos e impugnações deste edital acesse o link: https://cnetmobile.estaleiro.serpro.gov.br/comprasnet-web/public/landing?destino=quadro-informativo&compra=98092105900062024",
+  "srp": false,
+  "fontesOrcamentarias": [],
+  "emendaParlamentar": null,
+  "dataPublicacaoPncp": "2024-09-25T07:01:02",
+  "dataAberturaProposta": "2024-09-25T08:00:00",
+  "dataEncerramentoProposta": "2024-10-10T14:30:00",
+  "situacaoCompraId": 1,
+  "situacaoCompraNome": "Divulgada no PNCP",
+  "existeResultado": true,
+  "dataInclusao": "2024-09-25T07:01:02",
+  "dataAtualizacao": "2024-09-25T07:01:02",
+  "dataAtualizacaoGlobal": "2025-01-17T09:52:55",
+  "usuarioNome": "Compras.gov.br"
+}

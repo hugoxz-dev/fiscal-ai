@@ -1,7 +1,23 @@
 [
- {"id": 101, "dataReferencia": "01/10/2026", "dataInicioSancao": "15/03/2024", "dataFimSancao": "15/03/2026",
-  "tipoSancao": {"descricaoResumida": "Impedimento/proibição de contratar com prazo determinado", "descricaoPortal": "Impedimento"},
-  "orgaoSancionador": {"nome": "Prefeitura Municipal de Imperatriz", "siglaUf": "MA", "poder": "Executivo", "esfera": "Municipal"},
-  "sancionado": {"nome": "EMPRESA X LTDA", "codigoFormatado": "12.345.678/0001-99"},
-  "numeroProcesso": "123/2024"}
+  {
+    "id": 101,
+    "dataReferencia": "01/10/2026",
+    "dataInicioSancao": "15/03/2024",
+    "dataFimSancao": "15/03/2026",
+    "tipoSancao": {
+      "descricaoResumida": "Impedimento/proibição de contratar com prazo determinado",
+      "descricaoPortal": "Impedimento"
+    },
+    "orgaoSancionador": {
+      "nome": "Prefeitura Municipal de Imperatriz",
+      "siglaUf": "MA",
+      "poder": "Executivo",
+      "esfera": "Municipal"
+    },
+    "sancionado": {
+      "nome": "EMPRESA X LTDA",
+      "codigoFormatado": "12.345.678/0001-99"
+    },
+    "numeroProcesso": "123/2024"
+  }
 ]
